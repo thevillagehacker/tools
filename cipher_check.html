@@ -159,13 +159,15 @@
 
     let resultCount = 0;
 
-    // Function to check the input cipher suite from the search bar
-    function checkCipher() {
-      const inputCipher = document.getElementById('search-bar').value.trim();
-      if (inputCipher.length === 0) return; // Ignore empty input
-      checkAndDisplayCipher(inputCipher);
-    }
-
+// Function to check the input cipher suite from the search bar
+function checkCipher() {
+  const inputCipher = document.getElementById('search-bar').value.trim();
+  if (inputCipher.length === 0) return; // Ignore empty input
+  
+  // Split the input by commas and trim whitespace from each cipher
+  const ciphers = inputCipher.split(',').map(cipher => cipher.trim());
+  ciphers.forEach(cipher => checkAndDisplayCipher(cipher));
+}
     // Function to handle file upload and check ciphers line by line
     function handleFileUpload(event) {
       const file = event.target.files[0];
