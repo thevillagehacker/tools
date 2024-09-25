@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TLS Cipher Suite Checker</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+    }
+    #search-bar {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    table, th, td {
+      border: 1px solid black;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .secure {
+      color: green;
+    }
+    .weak {
+      color: orange;
+    }
+    .insecure {
+      color: red;
+      font-weight: bold;
+    }
+    .unknown {
+      color: gray;
+    }
+    #file-input {
+      margin-top: 20px;
+    }
+    #reset-btn {
+      margin-top: 10px;
+      padding: 4px 10px;
+      font-size: 16px;
+      background-color: #080505;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    #reset-btn:hover {
+      background-color: #d32f2f;
+    }
+        /* Center alignment for the S.No column */
+    th:first-child, td:first-child {
+      text-align: center;
+    }
+    th:nth-child(3), td:nth-child(3) {
+  text-align: center;
+}
+  </style>
+</head>
+<body>
+  <h1>TLS Cipher Suite Checker</h1>
+
+  <!-- Search Bar for Manual Input -->
+  <input type="text" id="search-bar" placeholder="Enter TLS Cipher Suite" oninput="checkCipher()">
+
+  <!-- File Upload -->
+  <input type="file" id="file-input" accept=".txt" onchange="handleFileUpload(event)">
+
+  <!-- Reset Button -->
+  <button id="reset-btn" onclick="resetFields()">Reset</button>
+
+  <!-- Table to display results -->
+  <table id="result-table">
+    <thead>
+      <tr>
+        <th style="text-align: center;">S.No</th>
+        <th  style="text-align: center;">Cipher Suite</th>
+        <th  style="text-align: center;">Result</th>
+      </tr>
+    </thead>
+    <tbody id="result-body"  style="text-align: center;">
+      <!-- Results will be appended here -->
+    </tbody>
+  </table>
+
+  <script>
+    // Database of cipher suites and their classification
+    const cipherDB = {
+  // Secure Cipher Suites
+  "TLS_AES_256_GCM_SHA384": "secure",
+  "TLS_AES_128_GCM_SHA256": "secure",
+  "TLS_CHACHA20_POLY1305_SHA256": "secure",
+  "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256": "secure",
+  "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384": "secure",
+  "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256": "secure",
+  "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384": "secure",
+  "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256": "secure",
+  "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256": "secure",
+  "TLS_DHE_RSA_WITH_AES_128_GCM_SHA256": "secure",
+  "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384": "secure",
+
+  // Weak Cipher Suites
+  "TLS_RSA_WITH_AES_128_GCM_SHA256": "weak",
+  "TLS_RSA_WITH_AES_256_GCM_SHA384": "weak",
+  "TLS_RSA_WITH_AES_128_CBC_SHA": "weak",
+  "TLS_RSA_WITH_AES_256_CBC_SHA": "weak",
+  "TLS_RSA_WITH_3DES_EDE_CBC_SHA": "weak", // 3DES is considered weak
+  "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA": "weak", // CBC ciphers are vulnerable to attacks
+  "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA": "weak",
+  "TLS_DHE_RSA_WITH_AES_128_CBC_SHA": "weak",
+  "TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA": "weak",
+  "TLS_DHE_RSA_WITH_AES_256_CBC_SHA": "weak",
+  "TLS_RSA_WITH_RC4_128_SHA": "weak",  // RC4 is deprecated
+
+  // Insecure Cipher Suites (SSLv2/SSLv3, NULL Ciphers, etc.)
+  "SSL_RSA_WITH_3DES_EDE_CBC_SHA": "insecure",
+  "SSL_RSA_WITH_RC4_128_SHA": "insecure",
+  "SSL_RSA_WITH_RC4_128_MD5": "insecure",
+  "SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA": "insecure",
+  "SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA": "insecure",
+  "SSL_DHE_DSS_WITH_RC4_128_SHA": "insecure",
+  "SSL_RSA_WITH_NULL_MD5": "insecure",   // NULL ciphers (no encryption)
+  "SSL_RSA_WITH_NULL_SHA": "insecure",
+  "TLS_RSA_WITH_NULL_SHA": "insecure",
+  "TLS_RSA_WITH_NULL_SHA256": "insecure",
+  "TLS_ECDHE_RSA_WITH_NULL_SHA": "insecure",
+  "TLS_ECDHE_ECDSA_WITH_NULL_SHA": "insecure",
+  "TLS_DHE_RSA_WITH_NULL_SHA": "insecure",
+  "TLS_DHE_RSA_WITH_DES_CBC_SHA": "insecure",
+  "TLS_RSA_WITH_DES_CBC_SHA": "insecure",
+  "SSL_RSA_EXPORT_WITH_RC4_40_MD5": "insecure",  // Export ciphers (40-bit key)
+  "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA": "insecure",
+  "SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5": "insecure",
+  "TLS_RSA_EXPORT_WITH_RC4_40_MD5": "insecure",
+  "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA": "insecure",
+  "TLS_DHE_RSA_EXPORT_WITH_DES40_CBC_SHA": "insecure",
+  
+  // Deprecated Protocol Ciphers (SSLv2, SSLv3)
+  "SSL_RSA_EXPORT_WITH_DES40_CBC_SHA": "insecure",
+  "SSL_RSA_EXPORT_WITH_RC4_40_MD5": "insecure",
+  "SSL_RSA_EXPORT_WITH_RC2_CBC_40_MD5": "insecure",
+  
+  // Legacy Export Ciphers (Deprecated 40-bit keys)
+  "TLS_RSA_EXPORT_WITH_DES40_CBC_SHA": "insecure",
+  "TLS_RSA_EXPORT_WITH_RC4_40_MD5": "insecure",
+  "TLS_RSA_EXPORT_WITH_RC2_CBC_40_MD5": "insecure"
+};
+
+    let resultCount = 0;
+
+// Function to check the input cipher suite from the search bar
+function checkCipher() {
+  const inputCipher = document.getElementById('search-bar').value.trim();
+  if (inputCipher.length === 0) return; // Ignore empty input
+  
+  // Split the input by commas and trim whitespace from each cipher
+  const ciphers = inputCipher.split(',').map(cipher => cipher.trim());
+  ciphers.forEach(cipher => checkAndDisplayCipher(cipher));
+}
+    // Function to handle file upload and check ciphers line by line
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const ciphers = e.target.result.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        ciphers.forEach(cipher => checkAndDisplayCipher(cipher));
+      };
+      reader.readAsText(file);
+    }
+
+    // Function to check and display a cipher suite in the table
+    function checkAndDisplayCipher(cipher) {
+      const resultBody = document.getElementById('result-body');
+      const classification = cipherDB[cipher] || "unknown";
+
+      // Increment result count for S.No
+      resultCount++;
+
+      // Create a new table row
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${resultCount}</td>
+        <td>${cipher}</td>
+        <td class="${classification}">${classification.toUpperCase()}</td>
+      `;
+      resultBody.appendChild(row);
+    }
+
+    // Function to reset the fields and table
+    function resetFields() {
+      document.getElementById('search-bar').value = "";
+      document.getElementById('file-input').value = "";
+      document.getElementById('result-body').innerHTML = ""; // Clear table
+      resultCount = 0; // Reset the counter
+    }
+  </script>
+</body>
+</html>
