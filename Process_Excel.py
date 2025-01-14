@@ -17,9 +17,9 @@ def process_large_file(input_file, output_file, url_column):
         print("Processing large CSV file in chunks...")
         chunk_iter = pd.read_csv(input_file, chunksize=10000)  # Adjust chunk size as needed
         for i, chunk in enumerate(chunk_iter):
-            print(f"Processing chunk {i + 1}...")
+            print(f"\nProcessing chunk {i + 1}...")
             print(f"Chunk {i + 1} size: {chunk.shape}")
-            print(chunk.head())  # Preview chunk data
+            print("Chunk column names:", chunk.columns)
 
             # Ensure the URL column exists in the chunk
             if url_column not in chunk.columns:
@@ -32,7 +32,7 @@ def process_large_file(input_file, output_file, url_column):
                 )
                 .agg({url_column: lambda x: ', '.join(sorted(set(x)))})
             )
-            print("Sample grouped data in chunk:")
+            print(f"Sample grouped data in chunk {i + 1}:")
             print(chunk_grouped.head())
 
             # Append grouped data to the main aggregated DataFrame
@@ -53,18 +53,23 @@ def process_large_file(input_file, output_file, url_column):
             )
             .agg({url_column: lambda x: ', '.join(sorted(set(x)))})
         )
+        print("Sample grouped data from the Excel file:")
+        print(aggregated_data.head())
 
     # Final grouping and sorting after aggregating all chunks
-    print("Final grouping and sorting...")
-    aggregated_data = (
-        aggregated_data.groupby(
-            [col for col in aggregated_data.columns if col != url_column], as_index=False
+    print("\nFinal grouping and sorting...")
+    if not aggregated_data.empty:
+        aggregated_data = (
+            aggregated_data.groupby(
+                [col for col in aggregated_data.columns if col != url_column], as_index=False
+            )
+            .agg({url_column: lambda x: ', '.join(sorted(set(x)))})
         )
-        .agg({url_column: lambda x: ', '.join(sorted(set(x)))})
-    )
-    aggregated_data = aggregated_data.sort_values(
-        by=[col for col in aggregated_data.columns if col != url_column]
-    )
+        aggregated_data = aggregated_data.sort_values(
+            by=[col for col in aggregated_data.columns if col != url_column]
+        )
+    else:
+        print("Warning: No data was processed from the file.")
 
     print("Final aggregated data preview:")
     print(aggregated_data.head())
