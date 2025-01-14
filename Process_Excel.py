@@ -25,6 +25,17 @@ def process_large_file(input_file, output_file, url_column):
             if url_column not in chunk.columns:
                 raise ValueError(f"Column '{url_column}' not found in chunk {i + 1}!")
 
+            # Check for missing values in the url_column
+            missing_values_count = chunk[url_column].isna().sum()
+            print(f"Missing values in '{url_column}': {missing_values_count}")
+
+            # Drop rows where the URL column is NaN
+            chunk = chunk.dropna(subset=[url_column])
+
+            if chunk.empty:
+                print(f"Chunk {i + 1} is empty after removing NaN values in '{url_column}'")
+                continue
+
             # Group and aggregate data within each chunk
             chunk_grouped = (
                 chunk.groupby(
@@ -45,6 +56,17 @@ def process_large_file(input_file, output_file, url_column):
         # Ensure the URL column exists
         if url_column not in df.columns:
             raise ValueError(f"Column '{url_column}' not found in the Excel file!")
+
+        # Check for missing values in the url_column
+        missing_values_count = df[url_column].isna().sum()
+        print(f"Missing values in '{url_column}': {missing_values_count}")
+
+        # Drop rows where the URL column is NaN
+        df = df.dropna(subset=[url_column])
+
+        if df.empty:
+            print(f"File is empty after removing NaN values in '{url_column}'")
+            return
 
         # Group data, aggregate the specified URL column with comma-separated unique values
         aggregated_data = (
