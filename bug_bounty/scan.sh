@@ -44,14 +44,15 @@ sleep 3
 # DNS Enumeration - Find Subdomains
 cat "$scan_path/roots.txt" | haktrails subdomains | anew "$scan_path/subs.txt" | wc -l
 cat "$scan_path/roots.txt" | subfinder | anew "$scan_path/subs.txt" | wc -l
-shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce | anew "$scan_path/subs.txt" | wc -l
+#better run this in a vps
+#shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce | anew "$scan_path/subs.txt" | wc -l
 
 # DNS Resolution - Resolve Discovered Subdomains
 puredns resolve "$scan_path/subs.txt" -w "$ppath/lists/resolvers.txt" -w "$scan_path/resolved.txt" | wc -l
-dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json" | jq -r '.[].a? // [] | .' | anew "$scan_path/ips.txt" | wc -l
+dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json" && jq -r '.. | objects | to_entries[] | select(.value | tostring | test("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) | .value' "$scan_path/dns.json" | anew "$scan_path/ips.txt" | wc -l
 
 # Port Scanning & HTTP Server Discovery
-nmap -iL "$scan_path/ips.txt" --top-ports 3000 -oN "$scan_path/nmap.xml"
+nmap -iL "$scan_path/ips.txt" --top-ports 3000 -oN "$scan_path/nmap.xml" -v
 cat "$scan_path/nmap.xml" | dnsx -l "$scan_path/dns.json" --hosts | httpx -json -o "$scan_path/http.json"
 
 cat "$scan_path/http.json" | jq -r '.url' | sed -e 's/:80$/g' -e 's/:443$/g' | sort -u > "$scan_path/http.txt"
