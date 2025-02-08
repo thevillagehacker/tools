@@ -44,7 +44,7 @@ sleep 3
 # DNS Enumeration - Find Subdomains
 cat "$scan_path/roots.txt" | haktrails subdomains | anew "$scan_path/subs.txt" | wc -l
 cat "$scan_path/roots.txt" | subfinder | anew "$scan_path/subs.txt" | wc -l
-cat "$scan_path/roots.txt" | shuffledns -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode resolve | anew "$scan_path/subs.txt" | wc -l
+shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce | anew "$scan_path/subs.txt" | wc -l
 
 # DNS Resolution - Resolve Discovered Subdomains
 puredns resolve "$scan_path/subs.txt" -w "$ppath/lists/resolvers.txt" -w "$scan_path/resolved.txt" | wc -l
