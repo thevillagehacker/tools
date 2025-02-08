@@ -40,13 +40,11 @@ cat "$scope_path/roots.txt" > "$scan_path/roots.txt"
 cp -v "$scope_path/roots.txt" "$scan_path/roots.txt"
 sleep 3
 
-cat "$scan_path/roots.txt" | subfinder | anew subs.txt
-cat "$scan_path/roots.txt" | shuffledns -w "$ppath/lists/pry-dns.txt" -r "$ppath/lists/resolvers.txt" | anew subs.txt
 
 # DNS Enumeration - Find Subdomains
-cat "$scan_path/roots.txt" | haktrails subdomains | anew subs.txt | wc -l
-cat "$scan_path/roots.txt" | subfinder | anew subs.txt | wc -l
-cat "$scan_path/roots.txt" | shuffledns -w "$ppath/lists/pry-dns.txt" -r "$ppath/lists/resolvers.txt" | anew subs.txt | wc -l
+cat "$scan_path/roots.txt" | haktrails subdomains | anew "$scan_path/subs.txt" | wc -l
+cat "$scan_path/roots.txt" | subfinder | anew "$scan_path/subs.txt" | wc -l
+cat "$scan_path/roots.txt" | shuffledns -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode resolve | anew "$scan_path/subs.txt" | wc -l
 
 # DNS Resolution - Resolve Discovered Subdomains
 puredns resolve "$scan_path/subs.txt" -w "$ppath/lists/resolvers.txt" -w "$scan_path/resolved.txt" | wc -l
@@ -63,8 +61,6 @@ gospider -S "$scan_path/http.txt" --json | grep '{}' | jq -r '.output?' | tee "$
 
 
 
-########### ADD SCAN LOGIC HERE ###########
-
 # Calculate time diff
 end_time=$(date +%s)
 seconds=$(expr $end_time - $timestamp)
@@ -77,4 +73,4 @@ else
 fi
 
 echo "Scan $id took $time"
-echo "Scan $id took $time" | notify
+#echo "Scan $id took $time" | notify
