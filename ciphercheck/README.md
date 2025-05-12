@@ -7,7 +7,7 @@ Check cipher suites for its stregths such as Secure, Insecure or Weak.
 
 > ***Note*** The text file should only contain the cipher suites.
 
-# Python Script
+# [Python Script](/cipher_check.py)
 
 ## Usage
 ```sh
