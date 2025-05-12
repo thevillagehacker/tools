@@ -14,3 +14,5 @@ Check cipher suites for its stregths such as Secure, Insecure or Weak.
 python cipher_check.py -f nmap_out.txt -o results.csv
 ```
 > The output will be printed and written to a csv file.
+### Output
+![img](/assets/cipher_check_output.png)
