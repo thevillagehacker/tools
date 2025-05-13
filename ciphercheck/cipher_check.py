@@ -19,11 +19,11 @@ def extract_ciphers(nmap_file):
 
     return ciphers
 
-# query ciphers
-def query_cipher_strength(cipher_name):
+# Query ciphers with optional proxy
+def query_cipher_strength(cipher_name, proxies=None):
     url = f"https://ciphersuite.info/api/cs/{cipher_name}"
     try:
-        response = requests.get(url)
+        response = requests.get(url, proxies=proxies, timeout=10)
         if response.status_code == 200:
             data = response.json()
             cs = data.get(cipher_name)
@@ -44,7 +44,6 @@ def query_cipher_strength(cipher_name):
     except Exception as e:
         return {"Cipher": cipher_name, "Strength": f"Error: {str(e)}"}
 
-
 # Save to CSV
 def save_to_csv(results, output_file):
     fieldnames = ["Cipher", "Strength", "TLS", "KEX", "Auth", "Enc", "Hash"]
@@ -58,6 +57,7 @@ def main():
     parser = argparse.ArgumentParser(description="Check TLS cipher strengths from Nmap output.")
     parser.add_argument('-f', '--file', required=True, help="Path to the Nmap output file")
     parser.add_argument('-o', '--output', required=True, help="Path to save CSV results")
+    parser.add_argument('-p', '--proxy', help="HTTP proxy (e.g., http://127.0.0.1:8080)")
 
     args = parser.parse_args()
     ciphers = extract_ciphers(args.file)
@@ -66,11 +66,13 @@ def main():
         print("[-] No cipher suites found in the Nmap file.")
         return
 
+    proxies = {"http": args.proxy, "https": args.proxy} if args.proxy else None
+
     print(f"[+] Found {len(ciphers)} cipher(s). Querying API...\n")
     results = []
 
     for cipher in ciphers:
-        result = query_cipher_strength(cipher)
+        result = query_cipher_strength(cipher, proxies=proxies)
         results.append(result)
         print(f"{cipher} -> Strength: {result['Strength']}")
 
