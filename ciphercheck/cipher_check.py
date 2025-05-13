@@ -2,6 +2,10 @@ import argparse
 import csv
 import requests
 import re
+import urllib3
+
+# disable SSL Warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Extract cipher suite names from Nmap output
 def extract_ciphers(nmap_file):
@@ -23,7 +27,7 @@ def extract_ciphers(nmap_file):
 def query_cipher_strength(cipher_name, proxies=None):
     url = f"https://ciphersuite.info/api/cs/{cipher_name}"
     try:
-        response = requests.get(url, proxies=proxies, timeout=10)
+        response = requests.get(url, proxies=proxies, timeout=10, verify=False)
         if response.status_code == 200:
             data = response.json()
             cs = data.get(cipher_name)
