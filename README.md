@@ -6,7 +6,7 @@
 
 ## [Enumerate HTTP Methods](/Enum-HTTP-Methods)
 
-## {File Fetcher](/FileFetcher)
+## [File Fetcher](/FileFetcher)
 
 ## [Cipher Check](/ciphercheck)
 
