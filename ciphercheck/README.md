@@ -1,8 +1,18 @@
 # ciphercheck
-Check cipher suites for its stregths such as Secure, Insecure or Weak.
+Check cipher suites for its stregths such as Secure, Insecure or Weak, etc.
+
+## [Python Script](cipher_check.py)
 
 ## Usage
-- Use comma separated list to search for multiple cipher suites in the search bar.
-- Use list of cipher suites from NMAP scan as text file and choose the file upload option to ananlyze it.
+```sh
+python cipher_check.py -f nmap_out.txt -o results.csv
+```
 
-> ***Note*** The text file should only contain the cipher suites.
+### For Proxy
+```sh
+python cipher_check.py -f nmap_out.txt -o results.csv -p http://127.0.0.1:8080
+```
+> The output will be printed and written to a csv file.
+
+### Output
+![img](/assets/cipher_check_output.png)
