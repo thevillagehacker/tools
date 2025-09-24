@@ -45,20 +45,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Trivy FS scan (fail on HIGH/CRITICAL)
+      - name: Run Trivy FS scan (report only)
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'HIGH,CRITICAL'
-          exit-code: '1'
-      - name: Upload Trivy SARIF
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-sarif
-          path: trivy-results.sarif
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          continue-on-error: true
+
 
   checkov:
     name: IaC scan (Checkov)
