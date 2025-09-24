@@ -56,8 +56,6 @@ jobs:
           exit-code: 1
         continue-on-error: true   # <- goes here, not in "with:"
 
-
-
   checkov:
     name: IaC scan (Checkov)
     runs-on: ubuntu-latest
