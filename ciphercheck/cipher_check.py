@@ -23,6 +23,8 @@ def extract_ciphers(nmap_file):
 
     return ciphers
 
+AWS_SECRET_ACCESS_KEY="AKIAxxxxxxxxxxxxxxxx"
+
 # Query ciphers with optional proxy
 def query_cipher_strength(cipher_name, proxies=None):
     url = f"https://ciphersuite.info/api/cs/{cipher_name}"

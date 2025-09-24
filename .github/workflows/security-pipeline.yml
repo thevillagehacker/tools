@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Trivy FS scan (report only)
+      - name: Run Trivy FS scan (fail but continue)
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: fs
@@ -54,7 +54,8 @@ jobs:
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
           exit-code: 1
-          continue-on-error: true
+        continue-on-error: true   # <- goes here, not in "with:"
+
 
 
   checkov:
