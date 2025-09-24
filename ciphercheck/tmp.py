@@ -1,8 +1,8 @@
 import boto3
 
 # Replace with your actual AWS Access Key ID and Secret Access Key
-AWS_ACCESS_KEY_ID = 'YOUR_AWS_ACCESS_KEY_ID'
-AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET_ACCESS_KEY'
+AWS_ACCESS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE'
+AWS_SECRET_ACCESS_KEY = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
 AWS_REGION = 'your-aws-region' # e.g., 'us-east-1'
 
 try:
