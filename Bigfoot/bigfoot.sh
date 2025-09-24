@@ -28,6 +28,8 @@ if ! [ -x "$(command -v http)" ]; then
   exit 1
 fi
 
+password="heelo@123"
+
 #heroku service error page check
 domcheck()
 {
