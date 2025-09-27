@@ -69,7 +69,7 @@ wget -q --show-progress https://raw.githubusercontent.com/danielmiessler/SecList
 
 # copy sorted resolvers to puredns config
 echo "[+] Copying resolvers to puredns config folder..."
-cp "$ppath/lists/sorted_resolvers.txt" /home/naveen/.config/puredns/resolvers.txt
+cp "$ppath/lists/sorted_resolvers.txt" "$HOME/.config/puredns/resolvers.txt"
 
 # DNS Resolution - Resolve Discovered Subdomains
 puredns resolve "$scan_path/subs.txt" -r "$ppath/lists/resolvers.txt" --resolvers-trusted "$ppath/lists/resolvers-trusted.txt" -w "$scan_path/resolved.txt" | wc -l
