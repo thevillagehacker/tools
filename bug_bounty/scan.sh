@@ -67,7 +67,7 @@ wget -q --show-progress https://raw.githubusercontent.com/danielmiessler/SecList
 cp "$ppath/lists/combined_subdomains.txt" /home/naveen/.config/puredns/resolvers.txt
 
 # DNS Resolution - Resolve Discovered Subdomains
-puredns resolve "$scan_path/subs.txt" -r "$ppath/lists/resolvers.txt" --resolvers-trusted resolvers-trusted.txt -w "$scan_path/resolved.txt" | wc -l
+puredns resolve "$scan_path/subs.txt" -r "$ppath/lists/resolvers.txt" --resolvers-trusted "$ppath/lists/resolvers-trusted.txt" -w "$scan_path/resolved.txt" | wc -l
 
 dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json" && jq -r '.. | objects | to_entries[] | select(.value | tostring | test("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) | .value' "$scan_path/dns.json" | anew "$scan_path/ips.txt" | wc -l
 
