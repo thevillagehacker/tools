@@ -50,21 +50,26 @@ echo "[+] Writing permutations to the subs path"
 cat "$scan_path/roots.txt" | alterx -silent | anew "$scan_path/subs.txt" | wc -l
 
 # download and place resolvers
+echo "[+] Downloading resolvers.txt..."
 wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers.txt -O "$ppath/lists/resolvers.txt"
+echo "[+] Downloading resolvers-trusted.txt..."
 wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers-trusted.txt -O "$ppath/lists/resolvers-trusted.txt"
+echo "[+] Downloading resolvers-extended.txt..."
 wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers-extended.txt -O "$ppath/lists/resolvers-extended.txt"
 
 # sort and unique resolvers
-cat "$ppath"/lists/*.txt | anew > "$ppath/lists/sorted_resolvers.txt"
+cat "$ppath"/lists/resolvers*.txt | anew > "$ppath/lists/sorted_resolvers.txt"
 
 # download subdomain wordlist combined
+echo "[+] Downloading combined_subdomains..."
 wget -q --show-progress https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/DNS/combined_subdomains.txt -O "$ppath/lists/combined_subdomains.txt"
 
 #better run this in a vps
 #shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/combined_subdomains.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce -silent | anew "$scan_path/subs.txt" | wc -l
 
 # copy sorted resolvers to puredns config
-cp "$ppath/lists/combined_subdomains.txt" /home/naveen/.config/puredns/resolvers.txt
+echo "[+] Copying resolvers to puredns config folder..."
+cp "$ppath/lists/sorted_resolvers.txt" /home/naveen/.config/puredns/resolvers.txt
 
 # DNS Resolution - Resolve Discovered Subdomains
 puredns resolve "$scan_path/subs.txt" -r "$ppath/lists/resolvers.txt" --resolvers-trusted "$ppath/lists/resolvers-trusted.txt" -w "$scan_path/resolved.txt" | wc -l
