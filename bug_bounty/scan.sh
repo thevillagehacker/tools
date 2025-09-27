@@ -43,12 +43,32 @@ sleep 3
 
 # DNS Enumeration - Find Subdomains
 cat "$scan_path/roots.txt" | haktrails subdomains | anew "$scan_path/subs.txt" | wc -l
-cat "$scan_path/roots.txt" | subfinder | anew "$scan_path/subs.txt" | wc -l
+subfinder -d "$(cat "$scan_path/roots.txt")" -all -silent | anew "$scan_path/subs.txt" | wc -l
+
+# alterx subdomain wordlist generatiion
+echo "[+] Writing permutations to the subs path"
+cat "$scan_path/roots.txt" | alterx -silent | anew "$scan_path/subs.txt" | wc -l
+
+# download and place resolvers
+wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers.txt -O "$ppath/lists/resolvers.txt"
+wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers-trusted.txt -O "$ppath/lists/resolvers-trusted.txt"
+wget -q --show-progress https://raw.githubusercontent.com/trickest/resolvers/refs/heads/main/resolvers-extended.txt -O "$ppath/lists/resolvers-extended.txt"
+
+# sort and unique resolvers
+cat "$ppath"/lists/*.txt | anew > "$ppath/lists/sorted_resolvers.txt"
+
+# download subdomain wordlist combined
+wget -q --show-progress https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Discovery/DNS/combined_subdomains.txt -O "$ppath/lists/combined_subdomains.txt"
+
 #better run this in a vps
-#shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/dns.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce | anew "$scan_path/subs.txt" | wc -l
+#shuffledns -d "$(cat "$scan_path/roots.txt")" -w "$ppath/lists/combined_subdomains.txt" -r "$ppath/lists/resolvers.txt" -mode bruteforce -silent | anew "$scan_path/subs.txt" | wc -l
+
+# copy sorted resolvers to puredns config
+cp "$ppath/lists/combined_subdomains.txt" /home/naveen/.config/puredns/resolvers.txt
 
 # DNS Resolution - Resolve Discovered Subdomains
-puredns resolve "$scan_path/subs.txt" -w "$ppath/lists/resolvers.txt" -w "$scan_path/resolved.txt" | wc -l
+puredns resolve "$scan_path/subs.txt" -r "$ppath/lists/resolvers.txt" --resolvers-trusted "$ppath/lists/resolvers-trusted.txt" -w "$scan_path/resolved.txt" | wc -l
+
 dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json" && jq -r '.. | objects | to_entries[] | select(.value | tostring | test("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) | .value' "$scan_path/dns.json" | anew "$scan_path/ips.txt" | wc -l
 
 # Port Scanning & HTTP Server Discovery
@@ -60,7 +80,8 @@ cat "$scan_path/http.json" | jq -r '.url' | sed -e 's/:80$/g' -e 's/:443$/g' | s
 # Crawling
 gospider -S "$scan_path/http.txt" --json | grep '{}' | jq -r '.output?' | tee "$scan_path/crawl.txt"
 
-
+# more crawling with katana
+#katana -u "$scan_path/resolved.txt" -xhr -jsl -d 6
 
 # Calculate time diff
 end_time=$(date +%s)
