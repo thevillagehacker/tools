@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# ========================================================
+#  Automated Scan Script for Recon for bug bounty targets
+# ========================================================
+#  Author: Naveen Jagadeesan(thevillagehacker)
+#  Description: Runs reconnaissance against the targets
+# ========================================================
 
 # Set vars
 id="$1"
