@@ -5,6 +5,11 @@
 #  - compartmentalized functions
 #  - safe edits to ~/.zshrc
 # ===============================================
+#  Author: Naveen Jagadeesan(thevillagehacker)
+#  Description: Sets up Zsh, Go, PDTM, GRC, and 
+#               installs key recon tools.
+# ===============================================
+
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -14,6 +19,15 @@ YELLOW="\e[33m"
 BLUE="\e[34m"
 RED="\e[31m"
 RESET="\e[0m"
+
+# --- Privilege check & disclaimer ---
+if [[ "$EUID" -ne 0 ]]; then
+  echo -e "\n${YELLOW}[NOTE]${RESET} Some operations require administrative privileges."
+  echo -e "${YELLOW}[ACTION REQUIRED]${RESET} Please run this script with sudo:"
+  echo -e "  ${BLUE}sudo ./setup.sh${RESET}\n"
+  exit 1
+fi
+
 
 # Globals
 GOPATH_DEFAULT="$HOME/go"
