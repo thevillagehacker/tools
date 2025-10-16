@@ -9,6 +9,35 @@
 #  Description: Sets up Zsh, Go, PDTM, GRC, and 
 #               installs key recon tools.
 # ===============================================
+# =========[ Print Helpers ]=========
+# --- Print helpers (must appear BEFORE any function that calls them) ---
+print_info()    { echo -e "\033[1;34m[INFO]\033[0m $*"; }
+print_warn()    { echo -e "\033[1;33m[WARN]\033[0m $*"; }
+print_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $*"; }
+print_error()   { echo -e "\033[1;31m[ERROR]\033[0m $*"; }
+
+# Small guard: if the script is partially sourced or run in a weird shell
+# make sure these functions exist (idempotent).
+for fn in print_info print_warn print_success print_error; do
+  declare -f "$fn" >/dev/null 2>&1 || eval "$fn() { echo \"[${fn^^}] \$*\"; }"
+done
+
+# --- Exit handling ---
+_on_exit() {
+  local rc=$?
+  if [[ $rc -eq 0 ]]; then
+    # Only print final message on successful completion
+    # If final_message() exists, call it; otherwise, show a brief success line.
+    if declare -f final_message >/dev/null 2>&1; then
+      final_message
+    else
+      print_success "Setup completed successfully!"
+    fi
+  else
+    print_error "Setup failed (exit code $rc). Check earlier messages above for details."
+  fi
+}
+trap _on_exit EXIT
 
 set -euo pipefail
 IFS=$'\n\t'
