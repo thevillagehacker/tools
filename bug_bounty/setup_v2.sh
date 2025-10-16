@@ -236,16 +236,39 @@ install_nmap() {
 
 setup_bug_bounty_dir() {
   print_info "Creating bug_bounty directory and downloading scan.sh..."
-  mkdir -p "$HOME/bug_bounty/scope" "$HOME/bug_bounty/lists"
-  pushd "$HOME/bug_bounty" >/dev/null
+
+  # Determine the target user/home:
+  # If script was run with sudo, SUDO_USER is set to the original user.
+  if [[ -n "${SUDO_USER-}" && "${SUDO_USER}" != "root" ]]; then
+    TARGET_USER="$SUDO_USER"
+    TARGET_HOME="$(getent passwd "$TARGET_USER" | cut -d: -f6)"
+  else
+    TARGET_USER="$(whoami)"
+    TARGET_HOME="$HOME"
+  fi
+
+  # Fallback if getent failed
+  if [[ -z "$TARGET_HOME" ]]; then
+    TARGET_HOME="$HOME"
+  fi
+
+  print_info "Using target home: $TARGET_HOME (user: $TARGET_USER)"
+
+  mkdir -p "$TARGET_HOME/bug_bounty/scope" "$TARGET_HOME/bug_bounty/lists"
+
+  pushd "$TARGET_HOME/bug_bounty" >/dev/null || {
+    print_warn "Could not change to $TARGET_HOME/bug_bounty"
+    return 1
+  }
 
   local scan_url="https://raw.githubusercontent.com/thevillagehacker/tools/refs/heads/main/bug_bounty/scan.sh"
   local target="scan.sh"
 
+  # Download robustly (-f: fail on HTTP error, -S: show error, -L: follow redirects, -O: write filename)
   if [[ -f "$target" ]]; then
-    print_ok "scan.sh already present in $PWD"
+    print_ok "scan.sh already present at $TARGET_HOME/bug_bounty/$target"
   else
-    if curl -fsSLO "$scan_url"; then
+    if curl -fSL -o "$target" "$scan_url"; then
       chmod +x "$target"
       print_ok "Downloaded and made executable: $target"
     else
@@ -253,8 +276,15 @@ setup_bug_bounty_dir() {
     fi
   fi
 
+  # Ensure ownership is the real user (useful if script executed with sudo)
+  if command -v chown >/dev/null 2>&1; then
+    sudo chown -R "${TARGET_USER}:${TARGET_USER}" "$TARGET_HOME/bug_bounty" 2>/dev/null || true
+  fi
+
   popd >/dev/null
+  print_success "Bug bounty directory and scan.sh ready at: $TARGET_HOME/bug_bounty"
 }
+
 
 final_message() {
   cat <<'USAGE'
