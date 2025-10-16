@@ -114,7 +114,7 @@ configure_gopath_and_zshrc() {
   local gopath_line="export GOPATH=${GOPATH_DEFAULT}"
   local path_line='export PATH=$PATH:$GOPATH/bin'
   local aliases_marker="# === added by setup.sh aliases ==="
-  local aliases_content=$'alias ll=\'ls -lshaF --color=auto\'\nalias la=\'ls -A\'\nalias l=\'ls -CF\'\nalias cls=\'clear\''
+  local aliases_content=$'alias ll=\'ls -lshaF --color=auto\'\nalias la=\'ls -A\'\nalias l=\'ls -CF\'\nalias cls=\'clear\'\n# Show full timestamped history\nalias h=\'fc -lt "%F %T"\''
   local grc_marker='[[ -s "/etc/grc.zsh" ]] && source /etc/grc.zsh'
 
   # Ensure ~/.zshrc exists
@@ -130,7 +130,7 @@ configure_gopath_and_zshrc() {
       printf "%s\n" "$aliases_content"
       printf "%s\n" "# === end setup.sh aliases ==="
     } >> "$ZSHRC"
-    print_ok "Aliases added to $ZSHRC"
+    print_ok "Aliases (including 'h') added to $ZSHRC"
   else
     print_ok "Aliases block already present in $ZSHRC"
   fi

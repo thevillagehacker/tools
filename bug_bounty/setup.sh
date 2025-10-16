@@ -85,6 +85,7 @@ alias ll='ls -lshaF --color=auto'
 alias la='ls -A'
 alias l='ls -CF'
 alias cls='clear'
+alias h='fc -lt "%F %T"'s
 ALIASES
 
   # Add GRC integration
