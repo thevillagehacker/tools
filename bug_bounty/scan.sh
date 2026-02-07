@@ -38,21 +38,20 @@ setup_target() {
     mkdir -p "$scope_path"
     
     # Ask for roots content
+    echo ""
     echo -e "${YELLOW}[*]${NC} Enter the target roots (domains/IPs) for $target_id"
-    echo -e "${YELLOW}[*]${NC} You can enter multiple roots, one per line. Press Ctrl+D when done:"
+    echo -e "${YELLOW}[*]${NC} You can enter multiple roots, one per line."
+    echo -e "${YELLOW}[*]${NC} Press Ctrl+D (or Ctrl+Z on Windows) when done:"
     echo "---"
     
-    # Read multi-line input and write to roots.txt
-    cat > "$scope_path/roots.txt" << 'EOF'
-EOF
-    # Read user input into the file
-    while IFS= read -r line; do
-        echo "$line" >> "$scope_path/roots.txt"
-    done
+    # Read user input and write to roots.txt
+    cat > "$scope_path/roots.txt"
     
     echo "---"
+    echo ""
     log "Target directory created at: $scope_path"
     log "Roots file saved at: $scope_path/roots.txt"
+    echo ""
     
     echo "$target_id"
 }
