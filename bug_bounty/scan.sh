@@ -90,7 +90,7 @@ fi
 
 # Prompt for target if not provided as argument
 if [ -z "$1" ]; then
-    echo -e "${YELLOW}[*]${NC} No target ID provided"
+    echo -e "${YELLOW}[-]${NC} No target ID provided"
     read -p "Enter target name: " id
     if [ -z "$id" ]; then
         error "Target name cannot be empty"
