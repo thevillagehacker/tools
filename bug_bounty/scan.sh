@@ -90,7 +90,7 @@ fi
 
 # Prompt for target if not provided as argument
 if [ -z "$1" ]; then
-    echo -e "${YELLOW}[*]${NC} No target ID provided"
+    echo -e "${YELLOW}[-]${NC} No target ID provided"
     read -p "Enter target name: " id
     if [ -z "$id" ]; then
         error "Target name cannot be empty"
@@ -173,7 +173,10 @@ log "DNS Resolution: Resolving subdomains with puredns..."
 puredns resolve "$scan_path/subs.txt" -r "$lists_path/resolvers.txt" --resolvers-trusted "$lists_path/resolvers-trusted.txt" -w "$scan_path/resolved.txt" | wc -l
 
 log "DNS Resolution: Extracting IP addresses with dnsx..."
-dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json" && jq -r '.. | objects | to_entries[] | select(.value | tostring | test("^\\d+\\.\\d+\\.\\d+\\.\\d+$")) | .value' "$scan_path/dns.json" | anew "$scan_path/ips.txt" | wc -l
+dnsx -l "$scan_path/resolved.txt" -json -o "$scan_path/dns.json"
+log "Extracting IP addresses from $scan_path/dns.json"
+# Use grep to extract IPv4 addresses from the JSON output (robust across different dnsx JSON shapes)
+grep -oE '\b([0-9]{1,3}\\.){3}[0-9]{1,3}\b' "$scan_path/dns.json" | anew "$scan_path/ips.txt" | wc -l
 
 # Port Scanning & HTTP Server Discovery
 log "Port Scanning: Running nmap on discovered IPs..."
