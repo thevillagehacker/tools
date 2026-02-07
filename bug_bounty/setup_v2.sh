@@ -59,10 +59,17 @@ fi
 
 
 # Globals
-GOPATH_DEFAULT="$HOME/go"
 ZSHRC="$HOME/.zshrc"
 TMPDIR="$(mktemp -d)"
 ORIG_PWD="$(pwd)"
+
+# Determine GOPATH: query existing Go installation or use default
+if command -v go >/dev/null 2>&1; then
+  GOPATH_DEFAULT="$(go env GOPATH)"
+  [[ -z "$GOPATH_DEFAULT" ]] && GOPATH_DEFAULT="$HOME/go"
+else
+  GOPATH_DEFAULT="$HOME/go"
+fi
 
 cleanup() {
   [[ -d "$TMPDIR" ]] && rm -rf "$TMPDIR"
@@ -175,7 +182,8 @@ install_go_bin() {
   local binary_name="${2:-$(basename "$import_path")}"
   local bin_path="$GOPATH_DEFAULT/bin/$binary_name"
 
-  if cmd_exists "$binary_name" || [[ -x "$bin_path" ]]; then
+  # Verify binary exists in GOPATH/bin and is actually executable
+  if [[ -x "$bin_path" ]]; then
     print_ok "Go binary '$binary_name' already available."
     return 0
   fi
@@ -215,7 +223,7 @@ install_pdtm_and_tools() {
   if cmd_exists pdtm || [[ -x "$GOPATH_DEFAULT/bin/pdtm" ]]; then
     print_info "Running 'pdtm -ia' to install PDTM tools (may take some time)..."
     # Use a subshell to prevent script aborting on non-zero (pdtm may exit non-zero while still partially installed)
-    if pdtm -ia; then
+    if "$GOPATH_DEFAULT/bin/pdtm" -ia; then
       print_ok "PDTM tools installed."
     else
       print_warn "pdtm -ia returned non-zero exit. Some tools may not have been installed."
