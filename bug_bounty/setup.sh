@@ -92,7 +92,7 @@ show_help() {
 Usage: setup.sh [ -h | --help ]
 
 This script installs/configures:
- - zsh, golang, grc, nmap, massdns (puredns build)
+ - zsh, golang, grc, nmap, puredns
  - pdtm + pdtm tools
  - haktrails, anew, gospider
  - bug_bounty directory + scan.sh
@@ -141,13 +141,14 @@ update_system() {
 }
 
 install_core_packages() {
-  print_info "Ensuring core packages are installed (zsh, golang, grc, make, git, curl)..."
+  print_info "Ensuring core packages are installed (zsh, golang, grc, make, git, curl, jq)..."
   ensure_apt_package zsh
   ensure_apt_package golang
   ensure_apt_package grc
   ensure_apt_package make
   ensure_apt_package git
   ensure_apt_package curl
+  ensure_apt_package jq
   print_ok "Core packages ensured."
 }
 
@@ -239,37 +240,16 @@ install_pdtm_and_tools() {
 }
 
 install_recon_tools() {
-  # haktrails (binary: haktrails), anew (binary: anew), gospider (binary: gospider)
+  # haktrails (binary: haktrails), anew (binary: anew), gospider (binary: gospider), puredns (binary: puredns)
   install_go_bin github.com/hakluke/haktrails@latest haktrails
   install_go_bin github.com/tomnomnom/anew@latest anew
   install_go_bin github.com/jaeles-project/gospider@latest gospider
+  install_go_bin github.com/d3mondev/puredns/v2@latest puredns
 }
 
 install_massdns() {
-  # massdns binary path: /usr/local/bin/massdns or in PATH as 'massdns'
-  if cmd_exists massdns || [[ -x "/usr/local/bin/massdns" ]] || [[ -x "/bin/massdns" ]]; then
-    print_ok "massdns already installed."
-    return 0
-  fi
-
-  print_info "Building massdns (puredns) from source..."
-  pushd "$TMPDIR" >/dev/null
-  git clone --depth 1 https://github.com/blechschmidt/massdns.git || {
-    print_err "Failed to clone massdns repository."
-  }
-  cd massdns
-  make || print_err "make failed for massdns."
-  sudo make install || print_warn "sudo make install failed; trying manual copy."
-  # try copying produced binary if exists
-  if [[ -f "bin/massdns" ]]; then
-    sudo cp -f bin/massdns /usr/local/bin/
-    print_ok "massdns installed to /usr/local/bin"
-  elif [[ -f "/bin/massdns" || -f "/usr/local/bin/massdns" ]]; then
-    print_ok "massdns appears installed system-wide"
-  else
-    print_warn "massdns binary not found after build"
-  fi
-  popd >/dev/null
+  # puredns is now installed via Go install in install_recon_tools
+  print_ok "puredns is installed via install_recon_tools function"
 }
 
 install_nmap() {
