@@ -37,22 +37,23 @@ setup_target() {
     # Create scope and target directories
     mkdir -p "$scope_path"
     
-    # Ask for roots content
-    echo ""
-    echo -e "${YELLOW}[*]${NC} Enter the target roots (domains/IPs) for $target_id"
-    echo -e "${YELLOW}[*]${NC} You can enter multiple roots, one per line."
-    echo -e "${YELLOW}[*]${NC} Press Ctrl+D (or Ctrl+Z on Windows) when done:"
-    echo "---"
+    # Ask for roots content (send prompts to stderr so they don't get captured by command substitution)
+    echo "" >&2
+    echo -e "${YELLOW}[*]${NC} Enter the target roots (domains/IPs) for $target_id" >&2
+    echo -e "${YELLOW}[*]${NC} You can enter multiple roots, one per line." >&2
+    echo -e "${YELLOW}[*]${NC} Press Ctrl+D (or Ctrl+Z on Windows) when done:" >&2
+    echo "---" >&2
     
     # Read user input and write to roots.txt
     cat > "$scope_path/roots.txt"
     
-    echo "---"
-    echo ""
-    log "Target directory created at: $scope_path"
-    log "Roots file saved at: $scope_path/roots.txt"
-    echo ""
+    echo "---" >&2
+    echo "" >&2
+    echo -e "${GREEN}[+]${NC} Target directory created at: $scope_path" >&2
+    echo -e "${GREEN}[+]${NC} Roots file saved at: $scope_path/roots.txt" >&2
+    echo "" >&2
     
+    # Only echo the target_id to stdout so it gets captured by command substitution
     echo "$target_id"
 }
 
