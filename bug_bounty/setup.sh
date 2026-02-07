@@ -141,13 +141,14 @@ update_system() {
 }
 
 install_core_packages() {
-  print_info "Ensuring core packages are installed (zsh, golang, grc, make, git, curl)..."
+  print_info "Ensuring core packages are installed (zsh, golang, grc, make, git, curl, jq)..."
   ensure_apt_package zsh
   ensure_apt_package golang
   ensure_apt_package grc
   ensure_apt_package make
   ensure_apt_package git
   ensure_apt_package curl
+  ensure_apt_package jq
   print_ok "Core packages ensured."
 }
 
