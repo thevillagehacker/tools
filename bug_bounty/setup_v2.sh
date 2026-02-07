@@ -59,10 +59,22 @@ fi
 
 
 # Globals
-GOPATH_DEFAULT="$HOME/go"
-ZSHRC="$HOME/.zshrc"
 TMPDIR="$(mktemp -d)"
 ORIG_PWD="$(pwd)"
+
+# Detect original user when running with sudo
+ORIGINAL_USER="${SUDO_USER:-$USER}"
+USER_HOME="$(eval echo ~$ORIGINAL_USER)"
+ZSHRC="$USER_HOME/.zshrc"
+
+# Determine GOPATH: query existing Go installation or use default in user's home
+if command -v go >/dev/null 2>&1; then
+  # Run as original user to get their GOPATH
+  GOPATH_DEFAULT="$(sudo -u "$ORIGINAL_USER" go env GOPATH 2>/dev/null || echo "")"
+  [[ -z "$GOPATH_DEFAULT" ]] && GOPATH_DEFAULT="$USER_HOME/go"
+else
+  GOPATH_DEFAULT="$USER_HOME/go"
+fi
 
 cleanup() {
   [[ -d "$TMPDIR" ]] && rm -rf "$TMPDIR"
@@ -175,25 +187,26 @@ install_go_bin() {
   local binary_name="${2:-$(basename "$import_path")}"
   local bin_path="$GOPATH_DEFAULT/bin/$binary_name"
 
-  if cmd_exists "$binary_name" || [[ -x "$bin_path" ]]; then
+  # Verify binary exists in GOPATH/bin and is actually executable
+  if [[ -x "$bin_path" ]]; then
     print_ok "Go binary '$binary_name' already available."
     return 0
   fi
 
   print_info "Installing Go binary: $import_path"
-  # Ensure GOPATH dir exists
+  # Ensure GOPATH dir exists with correct ownership
   mkdir -p "$GOPATH_DEFAULT/bin"
+  chown -R "$ORIGINAL_USER:$ORIGINAL_USER" "$GOPATH_DEFAULT" 2>/dev/null || true
+  
   # Use `go install` (requires go >=1.16). If go not installed, apt package provided earlier
   if cmd_exists go; then
-    # try install
-    if go install "${import_path}" >/dev/null 2>&1; then
+    # Run go install as the original user with explicit GOPATH
+    if sudo -u "$ORIGINAL_USER" env GOPATH="$GOPATH_DEFAULT" GO111MODULE=on go install "${import_path}" >/dev/null 2>&1; then
       print_ok "Installed: $import_path"
+      chown -R "$ORIGINAL_USER:$ORIGINAL_USER" "$GOPATH_DEFAULT" 2>/dev/null || true
       return 0
     else
-      print_warn "go install failed for $import_path — trying with GOPATH env..."
-      GOPATH="$GOPATH_DEFAULT" GO111MODULE=on go install "${import_path}" || {
-        print_err "Failed to install $import_path"
-      }
+      print_err "Failed to install $import_path"
     fi
   else
     print_err "Go is not available; cannot go install $import_path"
@@ -212,10 +225,10 @@ install_pdtm_and_tools() {
   append_if_missing "$ZSHRC" "export PATH=\$PATH:\$GOPATH/bin" 'export PATH=$PATH:$GOPATH/bin'
 
   # Run pdtm -ia to install pdtm tools (only if pdtm exists)
-  if cmd_exists pdtm || [[ -x "$GOPATH_DEFAULT/bin/pdtm" ]]; then
+  if [[ -x "$GOPATH_DEFAULT/bin/pdtm" ]]; then
     print_info "Running 'pdtm -ia' to install PDTM tools (may take some time)..."
-    # Use a subshell to prevent script aborting on non-zero (pdtm may exit non-zero while still partially installed)
-    if pdtm -ia; then
+    # Run as original user with explicit GOPATH
+    if sudo -u "$ORIGINAL_USER" env GOPATH="$GOPATH_DEFAULT" PATH="$PATH:$GOPATH_DEFAULT/bin" "$GOPATH_DEFAULT/bin/pdtm" -ia; then
       print_ok "PDTM tools installed."
     else
       print_warn "pdtm -ia returned non-zero exit. Some tools may not have been installed."
