@@ -59,16 +59,21 @@ fi
 
 
 # Globals
-ZSHRC="$HOME/.zshrc"
 TMPDIR="$(mktemp -d)"
 ORIG_PWD="$(pwd)"
 
-# Determine GOPATH: query existing Go installation or use default
+# Detect original user when running with sudo
+ORIGINAL_USER="${SUDO_USER:-$USER}"
+USER_HOME="$(eval echo ~$ORIGINAL_USER)"
+ZSHRC="$USER_HOME/.zshrc"
+
+# Determine GOPATH: query existing Go installation or use default in user's home
 if command -v go >/dev/null 2>&1; then
-  GOPATH_DEFAULT="$(go env GOPATH)"
-  [[ -z "$GOPATH_DEFAULT" ]] && GOPATH_DEFAULT="$HOME/go"
+  # Run as original user to get their GOPATH
+  GOPATH_DEFAULT="$(sudo -u "$ORIGINAL_USER" go env GOPATH 2>/dev/null || echo "")"
+  [[ -z "$GOPATH_DEFAULT" ]] && GOPATH_DEFAULT="$USER_HOME/go"
 else
-  GOPATH_DEFAULT="$HOME/go"
+  GOPATH_DEFAULT="$USER_HOME/go"
 fi
 
 cleanup() {
