@@ -6,22 +6,13 @@
 #  Description: Runs reconnaissance against the targets
 # ======================================================
 
-# Set vars
-id="$1"
-ppath="$(pwd)"
-scope_path="$ppath/scope/$id"
-lists_path="$ppath/lists"
-
-timestamp="$(date +%s)"
-scan_path="$ppath/scans/$id-$timestamp"
-
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Logging function
+# Logging functions
 log() {
     echo -e "${GREEN}[+]${NC} $1"
 }
@@ -38,27 +29,81 @@ check_tool() {
     fi
 }
 
+# Function to setup target directory
+setup_target() {
+    local target_id="$1"
+    local scope_path="$ppath/scope/$target_id"
+    
+    # Create scope and target directories
+    mkdir -p "$scope_path"
+    
+    # Ask for roots content
+    echo -e "${YELLOW}[*]${NC} Enter the target roots (domains/IPs) for $target_id"
+    echo -e "${YELLOW}[*]${NC} You can enter multiple roots, one per line. Press Ctrl+D when done:"
+    echo "---"
+    
+    # Read multi-line input and write to roots.txt
+    cat > "$scope_path/roots.txt" << 'EOF'
+EOF
+    # Read user input into the file
+    while IFS= read -r line; do
+        echo "$line" >> "$scope_path/roots.txt"
+    done
+    
+    echo "---"
+    log "Target directory created at: $scope_path"
+    log "Roots file saved at: $scope_path/roots.txt"
+    
+    echo "$target_id"
+}
+
+# Set vars
+ppath="$(pwd)"
+lists_path="$ppath/lists"
+
 # Usage and disclaimer
 if [ "$1" == "-h" ]; then
-    echo "Usage: ./scan.sh <id>"
-    echo "This script performs a scan for a given <id>. Ensure the following structure is in place:"
+    echo "Usage: ./scan.sh [id]"
+    echo ""
+    echo "This script performs a scan for a given target ID."
+    echo ""
+    echo "Options:"
+    echo "  [id]  - Optional. If provided, uses existing scope/[id]/roots.txt"
+    echo "  -h    - Show this help message"
+    echo ""
+    echo "If no ID is provided, the script will prompt you to:"
+    echo "  1. Enter a target name (will create scope/[target_name]/ directory)"
+    echo "  2. Enter roots (domains/IPs to scan, one per line)"
+    echo ""
+    echo "Directory structure:"
     echo "├── scan.sh"
     echo "├── scans"
     echo "└── scope"
-    echo "    └── <id>"
+    echo "    └── [target_name]"
     echo "        └── roots.txt"
-    echo "Example:"
-    echo "chmod +x scan.sh"
-    echo "mkdir -p scope/example/"
-    echo "touch scope/example/roots.txt"
-    echo "./scan.sh example"
+    echo ""
+    echo "Examples:"
+    echo "  ./scan.sh example        # Use existing scope/example/roots.txt"
+    echo "  ./scan.sh                # Interactive mode - create new target"
     exit 0
 fi
 
-# Exit if scope_path doesn't exist
-if [ ! -d "$scope_path" ]; then
-    error "Scope path doesn't exist: $scope_path"
+# Prompt for target if not provided as argument
+if [ -z "$1" ]; then
+    echo -e "${YELLOW}[*]${NC} No target ID provided"
+    read -p "Enter target name: " id
+    if [ -z "$id" ]; then
+        error "Target name cannot be empty"
+    fi
+    id=$(setup_target "$id")
+else
+    id="$1"
 fi
+
+scope_path="$ppath/scope/$id"
+
+timestamp="$(date +%s)"
+scan_path="$ppath/scans/$id-$timestamp"
 
 # Check required tools
 log "Checking required tools..."
