@@ -1,1 +1,0 @@
-# Bug Bounty related scripts
