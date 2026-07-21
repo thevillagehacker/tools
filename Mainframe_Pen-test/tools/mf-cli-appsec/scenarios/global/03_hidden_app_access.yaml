@@ -1,0 +1,31 @@
+# GLOBAL — attempt to open an application NOT shown on the low-priv menu.
+app: ANY
+id: GLOBAL-MENU-HIDDEN-001
+name: Hidden / unlisted application access
+protocol: tn3270
+platform: session-manager
+tags: [menu, authz, vertical, global]
+severity_hint: high
+description: >
+  After logon, type an application code that should be blocked for this role.
+  Secure systems deny; FAIL of assert_denied means you reached something unexpected
+  (then review snapshot for privileged content).
+roles:
+  hidden_app: "ADMIN"    # change to a privileged APPLID/menu id from scope
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: login
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 01_menu
+  - action: select_app
+    text: "{{roles.hidden_app}}"
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 02_after_hidden
+  - action: assert_denied

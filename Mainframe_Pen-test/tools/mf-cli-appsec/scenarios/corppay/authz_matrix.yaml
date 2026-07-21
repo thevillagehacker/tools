@@ -1,0 +1,34 @@
+# CORP-PAY sample: attempt privileged approve transaction as clerk
+app: CORP-PAY
+id: CORP-PAY-AUTHZ-001
+name: Vertical authZ — clerk invokes approve transaction
+severity_hint: high
+description: >
+  Low-privilege user types supervisor approve transaction directly.
+  Secure design denies at CICS/RACF or application role check.
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+  - action: login
+  - action: pause
+    ms: 500
+  - action: snapshot
+    name: 01_login
+
+  # Example privileged tran (replace with real code):
+  # - action: clear
+  # - action: string
+  #   text: "PAYA"
+  # - action: enter
+  # - action: pause
+  #   ms: 400
+  # - action: snapshot
+  #   name: 02_approve_attempt
+  # - action: assert_denied
+
+  - action: comment
+    text: "Calibrate PAYA (or real approve tran) on TEST; expect assert_denied"

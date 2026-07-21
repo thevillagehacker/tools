@@ -1,0 +1,46 @@
+# Access-denied markers that appear across ESM vendors and English 3270 apps.
+# Safe default for any global TN3270 estate. Extend via site extra_deny_markers.
+id: global-deny
+name: Global multi-ESM denial markers
+platforms:
+  - generic-tn3270
+  - ibm-zos
+  - ibm-zvm
+  - ibm-zvse
+  - cics
+  - ims
+  - session-manager
+markers:
+  - "NOT AUTHORIZED"
+  - "NOT AUTHORISED"
+  - "ACCESS DENIED"
+  - "UNAUTHORIZED"
+  - "UNAUTHORISED"
+  - "NOT ALLOWED"
+  - "NOT PERMITTED"
+  - "PERMISSION DENIED"
+  - "INVALID REQUEST"
+  - "SECURITY VIOLATION"
+  - "SECURITY ERROR"
+  - "INSUFFICIENT AUTHORITY"
+  - "INSUFFICIENT ACCESS"
+  - "YOU ARE NOT AUTHORIZED"
+  - "LOGON FAILED"
+  - "LOGON REJECTED"
+  - "SIGNON FAILED"
+  - "SIGN-ON FAILED"
+  - "INVALID USER"
+  - "INVALID USERID"
+  - "INVALID PASSWORD"
+  - "ICH408I"
+  - "ICH408"
+  - "IRR012I"
+  - "ACF0"
+  - "TSS7251"
+  - "TSS7100"
+  - "DFHAC"
+  - "NOT AUTH"
+  - "APPLICATION NOT AVAILABLE"
+  - "SELECTION INVALID"
+  - "INVALID SELECTION"
+  - "UNKNOWN APPLICATION"

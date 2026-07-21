@@ -1,0 +1,51 @@
+# GLOBAL IDOR template — overwrite a business identifier on a detail screen.
+# Works for account, customer, employee, case, policy IDs on any 3270 app.
+app: ANY
+id: GLOBAL-IDOR-001
+name: Identifier field horizontal access control
+protocol: tn3270
+platform: generic-tn3270
+tags: [idor, authz, global]
+severity_hint: high
+description: >
+  Navigate to a detail/search flow (site-specific steps — calibrate), overwrite
+  the ID field with an out-of-scope canary, and assert sensitive markers do not appear.
+roles:
+  target_id: "999999"
+  # Optional: transaction or menu path to open search (site-specific)
+  open_tran: ""
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: login
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 01_home
+
+  # --- CALIBRATE BELOW for your application ---
+  # Example: select app then type a transaction/option
+  # - action: select_app
+  #   text: "PAYROLL"
+  # - action: string
+  #   text: "INQ"
+  # - action: enter
+  # - action: tab
+  #   text: "2"
+  # - action: type_field
+  #   text: "{{roles.target_id}}"
+  # - action: enter
+  # - action: pause
+  #   ms: 500
+  # - action: snapshot
+  #   name: 02_detail
+  # Sensitive text that must NOT appear for unauthorized ID:
+  # - action: assert_not_contains
+  #   text: "SALARY"
+  # - action: assert_not_contains
+  #   text: "SSN"
+
+  - action: comment
+    text: "Uncomment and calibrate navigation + assert_not_contains for your app"

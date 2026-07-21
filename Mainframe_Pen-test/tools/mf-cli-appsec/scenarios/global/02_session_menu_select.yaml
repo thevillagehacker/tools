@@ -1,0 +1,35 @@
+# GLOBAL — session manager / VTAM app list → select application by role.
+# Same flow colleagues use with wc3270 on any mainframe menu.
+app: ANY
+id: GLOBAL-MENU-001
+name: Application list selection
+protocol: tn3270
+platform: session-manager
+tags: [menu, authz, global, smoke]
+login_profile: generic-userid-password-tab
+severity_hint: medium
+description: >
+  Logs on, snapshots the application selection screen, selects an app by
+  name or menu number. Run twice with two roles and compare evidence dumps.
+roles:
+  # Replace with YOUR menu code, APPLID, or selection number:
+  app_code: "1"
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+    seconds: 30
+  - action: login
+  - action: pause
+    ms: 1000
+  - action: snapshot
+    name: 01_app_list
+  - action: select_app
+    text: "{{roles.app_code}}"
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 02_inside_app

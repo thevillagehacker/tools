@@ -1,0 +1,11 @@
+# Example raw s3270 script (manual). Run:
+#   s3270 -script < scripts/s3270_smoke.txt
+# Replace host and logon sequence for your site.
+Connect(127.0.0.1:23)
+Wait(InputField)
+Ascii()
+# String("TSO")
+# Enter()
+# ...
+Disconnect()
+Quit()

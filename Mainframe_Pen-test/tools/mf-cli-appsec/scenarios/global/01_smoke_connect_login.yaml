@@ -1,0 +1,32 @@
+# GLOBAL template — works on any TN3270 estate after site config + credentials.
+# Calibrate assert_contains text after first snapshot review.
+app: ANY
+id: GLOBAL-SMOKE-001
+name: Connect and logon smoke
+protocol: tn3270
+platform: generic-tn3270
+tags: [smoke, auth, global]
+login_profile: generic-userid-password-tab
+deny_profile: global-deny
+severity_hint: info
+description: >
+  Proves TN3270 path accepts credentials and returns a post-logon screen.
+  Use on z/OS, z/VM, z/VSE, or any 3270 session manager.
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+    seconds: 30
+  - action: snapshot
+    name: 01_pre_login
+  - action: login
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 02_post_login
+  # Uncomment and set a string always present after YOUR logon:
+  # - action: assert_any_contains
+  #   text: "APPLICATION|MENU|SELECT|READY|ISPF|COMMAND"

@@ -1,0 +1,44 @@
+# Example flow matching: wc3270 → logon → app list → select app by role
+# Calibrate every string to YOUR session manager (TPX / custom menu).
+# Worked EXAMPLE of a filled-in pack. Prefer scenarios/global/ for new engagements.
+app: CORP-PAY
+id: CORP-PAY-MENU-001
+name: Session manager — select payroll app as clerk
+protocol: tn3270
+platform: session-manager
+tags: [menu, example, corppay]
+login_profile: generic-userid-password-tab
+severity_hint: medium
+description: >
+  Mirrors the human wc3270 path: connect, logon, land on application list,
+  choose the payroll application, snapshot the landing screen.
+roles:
+  app_code: "PAYROLL"   # or menu number "2" — replace with your site value
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+    seconds: 30
+  - action: snapshot
+    name: 01_pre_login
+
+  - action: login
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 02_app_list
+
+  # Choose application from the list (same as typing in wc3270):
+  - action: select_app
+    text: "{{roles.app_code}}"
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 03_inside_app
+
+  # Optional: confirm you landed in the expected app
+  # - action: assert_contains
+  #   text: "CORP-PAY"

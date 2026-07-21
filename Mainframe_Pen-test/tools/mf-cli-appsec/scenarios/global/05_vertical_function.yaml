@@ -1,0 +1,33 @@
+# GLOBAL — invoke a privileged function/transaction as a low-privilege user.
+app: ANY
+id: GLOBAL-AUTHZ-VERT-001
+name: Vertical function authorization
+protocol: tn3270
+platform: generic-tn3270
+tags: [authz, vertical, global]
+severity_hint: high
+description: >
+  Types a privileged transaction code or menu path that the role should not have.
+  Expect assert_denied. Applies to CICS trans, ISPF options, custom menus, etc.
+roles:
+  priv_function: "ADMIN"   # e.g. CEMT, APPROVE, SYSOPT — site-specific
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: login
+  - action: pause
+    ms: 600
+  # Optional: enter an app first
+  # - action: select_app
+  #   text: "CICS"
+  - action: clear
+  - action: string
+    text: "{{roles.priv_function}}"
+  - action: enter
+  - action: pause
+    ms: 500
+  - action: snapshot
+    name: 01_priv_attempt
+  - action: assert_denied

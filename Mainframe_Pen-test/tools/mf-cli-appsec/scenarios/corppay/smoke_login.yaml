@@ -1,0 +1,32 @@
+# CORP-PAY sample: login smoke test
+# Customize connect/login sequence for your real APPLID / session manager.
+app: CORP-PAY
+id: CORP-PAY-SMOKE-001
+name: Login smoke and main menu visible
+severity_hint: info
+description: >
+  Confirms TN3270 path accepts test credentials and lands on an expected menu marker.
+  Edit string steps for your session manager (TPX) / CICS logon sequence.
+defaults:
+  user: ""          # override with --user or MF_USER
+  password: ""      # override with --pass or MF_PASS
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+  - action: snapshot
+    name: 01_banner
+  # Example: select TSO or CICS from VTAM (site-specific — replace)
+  # - action: string
+  #   text: "PAYT"
+  # - action: enter
+  - action: login
+  - action: pause
+    ms: 800
+  - action: snapshot
+    name: 02_after_login
+  # Assert a string you expect on the real main menu:
+  # - action: assert_contains
+  #   text: "CORP-PAY"
+  - action: comment
+    text: "Add assert_contains for your menu title after calibrating snapshots"

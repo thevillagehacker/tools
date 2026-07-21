@@ -1,0 +1,56 @@
+# CORP-PAY sample: horizontal IDOR on pay-slip detail
+# FAIL if sensitive data for victim EMPID appears for a low-privilege clerk.
+app: CORP-PAY
+id: CORP-PAY-IDOR-001
+name: Pay-slip detail horizontal IDOR
+severity_hint: high
+description: >
+  After clerk login, invoke search/detail with an out-of-scope EMPID.
+  If annual salary / restricted fields render, authorization is broken.
+roles:
+  victim_empid: "100999"
+  attacker_role: payclerk
+defaults:
+  user: ""
+  password: ""
+steps:
+  - action: connect
+  - action: wait
+    text: InputField
+  - action: login
+  - action: pause
+    ms: 500
+  - action: snapshot
+    name: 01_after_login
+
+  # --- Site-specific: open pay search transaction ---
+  # Clear and type CICS tran or menu path:
+  # - action: clear
+  # - action: string
+  #   text: "PAYS"
+  # - action: enter
+  # - action: pause
+  #   ms: 400
+
+  # --- Site-specific: fill EMPID field ---
+  # Prefer fixed tabs calibrated with smoke snapshots:
+  # - action: tab
+  # - action: tab
+  # - action: erase_eof
+  # - action: string
+  #   text: "{{roles.victim_empid}}"
+  # - action: enter
+  # - action: pause
+  #   ms: 500
+  # - action: snapshot
+  #   name: 02_detail_victim
+
+  # If detail shows restricted content, this assertion opens a finding:
+  # - action: assert_not_contains
+  #   text: "ANNUAL SALARY"
+
+  # Secure system should deny:
+  # - action: assert_denied
+
+  - action: comment
+    text: "Uncomment and calibrate steps against TEST APPLID before run-pack"

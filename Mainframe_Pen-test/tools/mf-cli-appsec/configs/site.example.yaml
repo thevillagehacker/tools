@@ -1,0 +1,25 @@
+# Copy to site.yaml (or acme-test.yaml) and fill for YOUR estate.
+# Same tool binary + different site files = portable across customers/LPARs.
+
+name: EXAMPLE-TEST-MAINFRAME
+protocol: tn3270                 # only protocol in v0.3
+platform: generic-tn3270         # or ibm-zos | ibm-zvm | session-manager | cics | ...
+
+host: "YOUR.TEST.HOST.OR.IP"
+port: 23                         # 992 common for TLS
+ssl: false                       # true + port 992 for L: TLS tunnel
+
+login_profile: generic-userid-password-tab
+deny_profile: global-deny
+profiles_dir: profiles           # relative to cwd when you launch the tool
+
+# Optional site-specific denial phrases (merged with deny profile)
+extra_deny_markers:
+  - "NOT AUTH FOR APPL"
+  # - "CUSTOM DENY TEXT FROM YOUR APP"
+
+# s3270: ""                      # leave empty for auto-detect
+pack_delay: 500ms
+notes: >
+  Replace host/port. Calibrate scenarios/global/*.yaml menu codes and assert
+  strings after one wc3270 walkthrough. Authorized TEST only.
