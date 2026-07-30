@@ -1,366 +1,298 @@
-# 🛠️ Tools
+# Tools
 
-> A curated collection of offensive security, reconnaissance, and bug bounty automation tools developed by **TheVillageHacker**.
+> Offensive security, reconnaissance, and bug bounty utilities by **TheVillageHacker**.
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Shell](https://img.shields.io/badge/Bash-Scripts-success)
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
-![Go](https://img.shields.io/badge/Go-1.20+-00ADD8)
+![Go](https://img.shields.io/badge/Go-1.21+-00ADD8)
 ![Security](https://img.shields.io/badge/Purpose-Offensive%20Security-red)
 
 ---
 
-## 📖 Overview
+## Overview
 
-This repository contains a collection of lightweight security utilities designed to simplify common penetration testing, reconnaissance, and bug bounty workflows.
+Lightweight helpers for:
 
-Most of the tools are focused on:
+- Web reconnaissance and attack-surface mapping
+- Subdomain takeover fingerprinting
+- Sensitive URL / file triage
+- HTTP method and CORS checks
+- TLS cipher review
+- End-to-end bug bounty recon automation
 
-- 🌐 Web Reconnaissance
-- 🔍 Attack Surface Enumeration
-- 📂 Sensitive File Discovery
-- ⚡ Automation
-- 🛡️ Security Validation
-- 🐞 Bug Bounty Hunting
-
-Whether you're performing reconnaissance during a penetration test or automating repetitive tasks in a bug bounty engagement, these scripts are intended to save time and improve efficiency.
+Use only on systems you are authorized to test.
 
 ---
 
-# 📦 Repository Structure
+## Repository structure
 
-```
+```text
 tools/
-│
-├── Bigfoot/               # Subdomain Takeover Detection
-├── Bulk-Ping/             # Bulk ICMP Reachability Checker
-├── Enum-HTTP-Methods/     # HTTP Method Enumeration
-├── FileFetcher/           # Sensitive File Endpoint Discovery
-├── ciphercheck/           # TLS Cipher Strength Analyzer
-├── urlscrapper/           # Website URL Extractor (Go)
-├── bug_bounty/            # Bug Bounty Helper Scripts
-├── cors/                  # CORS Testing Files
-├── utils/                 # Utility Scripts
-└── assets/                # Images and Documentation Assets
+├── recon/
+│   ├── Bigfoot/           # Subdomain takeover detection
+│   ├── FileFetcher/       # Interesting URL / sensitive path triage
+│   └── urlscrapper/       # Page URL extractor (Go)
+├── web/
+│   ├── cors/              # CORS CLI + browser PoC page
+│   └── Enum-HTTP-Methods/ # HTTP verb enumeration (Go + Python)
+├── network/
+│   ├── Bulk-Ping/         # Parallel host liveness
+│   └── ciphercheck/       # TLS cipher strength from Nmap output
+├── bug_bounty/
+│   ├── run.sh             # Full recon pipeline
+│   ├── setup.sh           # Install common recon tooling
+│   └── resolvers.txt
+├── Mainframe_Pen-test/    # Mainframe notes + mf-cli-appsec
+├── utils/                 # Shell / Oh My Posh helpers
+├── requirements.txt       # Python deps for Python tools
+└── README.md
 ```
 
 ---
 
-# 🚀 Included Tools
-
-## 🔍 Bigfoot
-
-Detect potential **Subdomain Takeover** vulnerabilities.
-
-### Features
-
-- Scan single domains
-- Scan multiple domains
-- Checks common takeover services including:
-
-- GitHub Pages
-- Heroku
-- AWS
-- Bitbucket
-- Shopify
-- Tumblr
-- Wordpress
-
-Example:
-
-```bash
-./bigfoot.sh -d example.com
-```
-
-or
-
-```bash
-./bigfoot.sh -f domains.txt
-```
-
----
-
-## 📡 Bulk Ping
-
-Quickly determine which hosts are alive.
-
-Useful during:
-
-- External Recon
-- Internal Network Assessment
-- Asset Validation
-
-Example
-
-```bash
-./bulk_ping.sh -f hosts.txt
-```
-
----
-
-## 🌐 HTTP Method Enumeration
-
-Enumerates supported HTTP methods exposed by web servers.
-
-Useful for identifying:
-
-- PUT
-- DELETE
-- TRACE
-- CONNECT
-- OPTIONS
-- PATCH
-
-Misconfigured HTTP methods often introduce security risks.
-
----
-
-## 📂 FileFetcher
-
-Automatically extracts interesting endpoints from URLs.
-
-Searches for files such as:
-
-- JavaScript
-- JSON
-- TXT
-- PHP
-- PDF
-- DOCX
-- XLSX
-- CSV
-
-Supports:
-
-- Single target
-- Multiple URLs
-- WaybackURLs output
-
-Example
-
-```bash
-./fetcher.sh -d example.com
-```
-
-or
-
-```bash
-./fetcher.sh -f urls.txt
-```
-
----
-
-## 🔐 CipherCheck
-
-Analyze TLS cipher suites and classify them based on their security strength.
-
-Categories include:
-
-- Secure
-- Weak
-- Insecure
-
-Example
-
-```bash
-python cipher_check.py \
--f nmap_output.txt \
--o results.csv
-```
-
-Supports proxy configuration as well.
-
----
-
-## 🌍 URL Scrapper
-
-A Go-based crawler that extracts URLs embedded within webpages.
-
-Features
-
-- Fast concurrent scraping
-- Status code validation
-- Output to file
-- Lightweight binary
-
-Example
-
-```bash
-urlscrapper -u https://example.com
-```
-
-With Status Codes
-
-```bash
-urlscrapper -u https://example.com -sc
-```
-
-Save Output
-
-```bash
-urlscrapper -u https://example.com -o output.txt
-```
-
----
-
-## 🐞 Bug Bounty Utilities
-
-A collection of helper scripts to automate common bug bounty tasks.
-
-Includes setup scripts, resolver lists, and workflow automation utilities.
-
----
-
-## 🌐 CORS
-
-Contains resources for testing Cross-Origin Resource Sharing (CORS) configurations.
-
-Useful while validating:
-
-- Origin Reflection
-- Wildcard Origins
-- Credential Misconfiguration
-
----
-
-# ⚙️ Installation
-
-Clone the repository
+## Quick start
 
 ```bash
 git clone https://github.com/thevillagehacker/tools.git
-
 cd tools
+
+# Bash tools
+chmod +x recon/*/*.sh network/*/*.sh bug_bounty/*.sh
+
+# Python tools
+pip install -r requirements.txt
+
+# Go tools
+cd recon/urlscrapper && go build -o urlscrapper . && cd ../..
+cd web/Enum-HTTP-Methods/src/go && go build -o enum-http-methods . && cd ../../../..
 ```
 
-Most Bash scripts simply require executable permissions.
+**Recommended environment:** Linux (Kali/Parrot/Ubuntu), or WSL. macOS works for most scripts if `bash` ≥ 4 and coreutils/`curl` are available.
+
+---
+
+## Tools
+
+### Bigfoot (`recon/Bigfoot/`) — subdomain takeover
+
+HTTP(S) fingerprinting against a large service list (`fingerprints.txt`), optional CNAME hints via `dig`/`host`, concurrent bulk scans.
 
 ```bash
-chmod +x */*.sh
+./recon/Bigfoot/bigfoot.sh -d dangling.example.com
+./recon/Bigfoot/bigfoot.sh -f subs.txt --only-vuln -o findings.txt
+./recon/Bigfoot/bigfoot.sh -f subs.txt --json -o findings.jsonl
 ```
 
-Python dependencies (where applicable)
+| Flag | Purpose |
+|------|---------|
+| `-d` / `-f` | Single host or host list |
+| `-c N` | Concurrency (default 10) |
+| `--only-vuln` | Print only possible takeovers |
+| `--json` | JSON lines |
+| `--http-only` | Skip HTTPS |
+| `--no-cname` | Skip CNAME lookup |
+
+Requires **curl** (or httpie). Edit `fingerprints.txt` to add providers (`service\|substring`).
+
+---
+
+### FileFetcher (`recon/FileFetcher/`) — interesting endpoints
+
+Pulls URLs via **waybackurls** or **gau** (`-d`), or classifies an existing list (`-f`). Buckets JS, PHP, JSON, docs, config/secrets, backups, API docs.
+
+```bash
+./recon/FileFetcher/fetcher.sh -d example.com
+./recon/FileFetcher/fetcher.sh -f urls.txt --probe -o out/example
+```
+
+| Flag | Purpose |
+|------|---------|
+| `-d` / `-f` | Domain (passive URLs) or file |
+| `-o DIR` | Output directory (default `./results`) |
+| `--probe` | Live-check interesting URLs (`httpx` or `curl`) |
+
+---
+
+### URL Scrapper (`recon/urlscrapper/`) — page link extraction
+
+Go tool: HTML attribute crawl + regex fallback, relative URL resolution, optional concurrent status checks.
+
+```bash
+cd recon/urlscrapper
+go build -o urlscrapper .
+./urlscrapper -u https://example.com
+./urlscrapper -u https://example.com -sc -c 20 -o links.txt
+./urlscrapper -u https://example.com --same-host -silent -o scoped.txt
+```
+
+| Flag | Purpose |
+|------|---------|
+| `-u` | Target URL (**required**) |
+| `-o` | Output file |
+| `-sc` | Status-code check |
+| `-c` | Status-check workers |
+| `--same-host` | Keep same hostname only |
+| `-timeout` | HTTP timeout |
+
+---
+
+### HTTP method enumeration (`web/Enum-HTTP-Methods/`)
+
+Probes common verbs, highlights dangerous methods that return 2xx, prints `Allow` / `Access-Control-Allow-Methods` on OPTIONS. Does **not** follow redirects by default.
+
+**Go:**
+
+```bash
+cd web/Enum-HTTP-Methods/src/go
+go build -o enum-http-methods .
+./enum-http-methods -u https://example.com/
+./enum-http-methods -l urls.txt -auth 'Bearer TOKEN' --json
+```
+
+**Python:**
+
+```bash
+python web/Enum-HTTP-Methods/src/python/methods.py -u https://example.com/
+python web/Enum-HTTP-Methods/src/python/methods.py -l urls.txt --json
+```
+
+---
+
+### CORS (`web/cors/`)
+
+1. **CLI (recommended)** — sets `Origin` server-side and inspects ACAO/ACAC:
+
+```bash
+python web/cors/cors_check.py -u https://target/api/me
+python web/cors/cors_check.py -u https://target/api -o https://evil.example --preflight --json
+```
+
+Exit code `2` if any check looks vulnerable.
+
+2. **`index.html`** — browser PoC. Host it on an origin you control; the browser sends *that* origin (JS cannot forge `Origin`). Use the CLI for arbitrary origins.
+
+---
+
+### Bulk-Ping (`network/Bulk-Ping/`)
+
+Parallel ICMP checks; optional TCP fallback when ICMP is filtered.
+
+```bash
+./network/Bulk-Ping/bulk_ping.sh -f hosts.txt
+./network/Bulk-Ping/bulk_ping.sh -f hosts.txt -c 100 --tcp 443
+```
+
+Writes `results/up.txt`, `down.txt`, `summary.txt`.
+
+---
+
+### CipherCheck (`network/ciphercheck/`)
+
+Parses Nmap `ssl-enum-ciphers` output, classifies via [ciphersuite.info](https://ciphersuite.info) with a **local fallback**.
+
+```bash
+python network/ciphercheck/cipher_check.py -f nmap_ssl.txt -o results.csv
+python network/ciphercheck/cipher_check.py -f nmap_ssl.txt -o results.csv --local-only
+python network/ciphercheck/cipher_check.py -f nmap_ssl.txt -o results.csv -p http://127.0.0.1:8080
+```
+
+---
+
+### Bug bounty pipeline (`bug_bounty/run.sh`)
+
+End-to-end recon:
+
+1. Subdomains (haktrails, subfinder, alterx)
+2. Resolve (puredns / dnsx)
+3. Optional nmap
+4. Live HTTP (httpx)
+5. Crawl (katana / gospider)
+6. Takeover (Bigfoot)
+7. Interesting URLs (wayback + FileFetcher)
+
+```bash
+cd bug_bounty   # or copy run.sh into your workspace
+mkdir -p scope/example
+echo example.com > scope/example/roots.txt
+./run.sh example
+./run.sh example --passive --no-crawl
+./run.sh example --dns-only
+./run.sh          # interactive target + roots
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--passive` / `--skip-nmap` | No nmap |
+| `--dns-only` | Stop after resolve |
+| `--no-crawl` / `--no-takeover` / `--no-files` | Skip stages |
+| `--debug` | Extra logs |
+
+**Environment setup** (Go tools, pdtm, zsh helpers):
+
+```bash
+sudo ./bug_bounty/setup.sh
+```
+
+`setup.sh` installs common binaries and prepares `~/bug_bounty` with `run.sh` (and a `scan.sh` symlink for older muscle memory).
+
+---
+
+## Typical workflow
+
+```text
+roots.txt
+    │
+    ▼
+run.sh  (or manual chain)
+    │
+    ├─► subfinder / haktrails / puredns
+    ├─► Bulk-Ping or httpx
+    ├─► Bigfoot (takeovers)
+    ├─► urlscrapper / katana / FileFetcher
+    ├─► Enum-HTTP-Methods / cors_check
+    └─► CipherCheck (from nmap TLS output)
+```
+
+---
+
+## Dependencies (summary)
+
+| Tool | Needs |
+|------|--------|
+| Bigfoot | `curl` (or httpie); optional `dig`/`host` |
+| FileFetcher | `waybackurls` or `gau`; optional `httpx` |
+| urlscrapper | Go 1.21+ |
+| Enum-HTTP-Methods | Go **or** Python + `requests`, `termcolor` |
+| cors_check | Python + `requests` |
+| CipherCheck | Python + `requests` |
+| Bulk-Ping | `ping`; bash `/dev/tcp` for `--tcp` |
+| run.sh | `subfinder`, `dnsx`, `httpx`, `anew`, `jq`; optional puredns, nmap, katana, gospider, waybackurls, haktrails, alterx |
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Go tools
+---
 
-```bash
-go build
-```
+## Mainframe notes
 
-or
-
-```bash
-go install
-```
+`Mainframe_Pen-test/` contains methodology docs and **mf-cli-appsec** (Go). See that directory’s README for build and usage. It is separate from the web recon toolkit.
 
 ---
 
-# 🧰 Recommended Environment
+## Contributing
 
-- Linux
-- Kali Linux
-- Parrot OS
-- Ubuntu
-- macOS (Most tools)
+Bug reports, fingerprint additions (`recon/Bigfoot/fingerprints.txt`), and PRs are welcome.
 
 ---
 
-# 📋 Use Cases
+## Disclaimer
 
-These tools can assist with:
-
-- Reconnaissance
-- Bug Bounty Hunting
-- Attack Surface Mapping
-- External Asset Discovery
-- Web Application Testing
-- Infrastructure Validation
-- TLS Security Review
-- Sensitive Endpoint Discovery
-
----
-
-# 🔄 Typical Workflow
-
-```text
-Target
-   │
-   ▼
-Bulk Ping
-   │
-   ▼
-Subdomain Enumeration
-   │
-   ▼
-Bigfoot
-   │
-   ▼
-HTTP Method Enumeration
-   │
-   ▼
-URL Scrapper
-   │
-   ▼
-FileFetcher
-   │
-   ▼
-CipherCheck
-   │
-   ▼
-Reporting
-```
-
----
-
-# 🤝 Contributing
-
-Contributions are always welcome.
-
-Feel free to:
-
-- Report bugs
-- Suggest improvements
-- Submit pull requests
-- Add new tools
-- Improve documentation
-
----
-
-# 💡 Future Improvements
-
-- Docker support
-- GitHub Actions CI
-- Binary releases
-- Better reporting
-- Additional bug bounty utilities
-- More recon automation
-- Project-wide installation script
-- Unit tests
-
----
-
-# ⚠️ Disclaimer
-
-These tools are intended for **authorized security testing, educational purposes, and research only**.
-
-Users are responsible for ensuring they have permission before scanning or testing any systems. The author assumes no responsibility for misuse.
-
----
-
-# ⭐ Support
-
-If you find these tools useful, consider starring the repository.
-
-It helps others discover the project and motivates future development.
+For **authorized** security testing, education, and research only. You are responsible for permission and legal compliance. The author assumes no liability for misuse.
 
 ---
 
 ## Author
 
-**TheVillageHacker**
-
-GitHub: https://github.com/thevillagehacker
+**TheVillageHacker** — [GitHub](https://github.com/thevillagehacker)

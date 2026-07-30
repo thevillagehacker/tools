@@ -1,0 +1,27 @@
+# Build artifacts
+*.exe
+*.test
+*.out
+recon/urlscrapper/urlscrapper
+web/Enum-HTTP-Methods/src/go/enum-http-methods
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Scan / tool outputs (keep directory placeholders)
+**/results/*
+!**/results/Readme.md
+!**/results/.gitkeep
+bug_bounty/scans/
+bug_bounty/scope/
+bug_bounty/lists/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

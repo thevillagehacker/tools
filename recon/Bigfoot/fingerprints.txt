@@ -1,0 +1,65 @@
+# Bigfoot fingerprints: service|substring
+# Lines starting with # are ignored.
+# Match is a case-sensitive substring against the HTTP response body.
+
+Heroku|//www.herokucdn.com/error-pages/no-such-app.html
+Heroku|No such app
+GitHub Pages|There isn't a GitHub Pages site here
+GitHub Pages|For root URLs (like http://example.com/) you must provide an index.html file
+AWS/S3|NoSuchBucket
+AWS/S3|The specified bucket does not exist
+Bitbucket|Repository not found
+Pantheon|404 error unknown site!
+Shopify|Sorry, this shop is currently unavailable
+Tumblr|Whatever you were looking for doesn't currently exist at this address
+WordPress.com|Do you want to register
+Ghost|The thing you were looking for is no longer here
+Surge.sh|project not found
+Cargo Collective|If you're moving your domain away from Cargo
+Webflow|The page you are looking for doesn't exist or has been moved
+Helpjuice|We could not find what you're looking for
+Help Scout|No settings were found for this company
+Teamwork|Oops - We didn't find your site
+Thinkific|You may have mistyped the address or the page may have moved
+Tilda|Please renew your subscription
+Unbounce|The requested URL was not found on this server
+UserVoice|This UserVoice subdomain is currently available
+Azure|404 Web Site not found
+Azure|The resource you are looking for has been removed
+Cloudfront|ERROR: The request could not be satisfied
+Fastly|Fastly error: unknown domain
+Netlify|Not Found - Request ID
+GitLab Pages|The page you're looking for could not be found
+Fly.io|404 Not Found
+Zendesk|Help Center Closed
+Zendesk|this help center no longer exists
+Readme.io|Project doesnt exist... yet!
+SmartJobBoard|This job board website is either expired or its domain name is invalid
+JetBrains|is not a registered InCloud YouTrack
+Kinsta|No Site For Domain
+LaunchRock|It looks like you may have taken a wrong turn somewhere
+Ngrok|ngrok.io not found
+Pantheon|The gods are wise
+Pingdom|This public report page has not been activated
+SmugMug|If you're the site owner
+Strikingly|But if you're looking to build your own website
+Tumblr|There's nothing here
+Uberflip|Non-hub domain
+Wordpress|Do you want to register
+Worksites|Hello! Sorry, but the website you
+Airee.ru|Ошибка 402. Сервис Айри.рф не оплачен
+Anima|If this is your website and you've just created it, try refreshing in a minute
+Campaign Monitor|Trying to access your account?
+Digital Ocean|Domain uses DO name servers with no records in DO
+Gemfury|404: This page could not be found
+HatenaBlog|404 Blog is not found
+Intercom|This page is reserved for artistic dogs
+Landingi|It looks like you're lost
+Mashery|Unrecognized domain
+Naver|The page you are looking for is not found
+Pipedrive|pipe-error-404
+Smartling|Domain is not configured
+Statuspage|Status page managed by Statuspage.io
+Uptimerobot|page not found
+Wordpress|doesn&rsquo;t&nbsp;exist
+EOF

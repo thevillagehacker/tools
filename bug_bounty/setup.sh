@@ -95,7 +95,7 @@ This script installs/configures:
  - zsh, golang, grc, nmap, puredns
  - pdtm + pdtm tools
  - haktrails, anew, gospider
- - bug_bounty directory + scan.sh
+ - bug_bounty directory layout (use repo run.sh for scans)
 
 It performs verification before installing to avoid conflicts.
 EOF
@@ -257,7 +257,7 @@ install_nmap() {
 }
 
 setup_bug_bounty_dir() {
-  print_info "Creating bug_bounty directory and downloading scan.sh..."
+  print_info "Creating bug_bounty working directories under the user home..."
 
   # Determine the target user/home:
   # If script was run with sudo, SUDO_USER is set to the original user.
@@ -276,35 +276,38 @@ setup_bug_bounty_dir() {
 
   print_info "Using target home: $TARGET_HOME (user: $TARGET_USER)"
 
-  mkdir -p "$TARGET_HOME/bug_bounty/scope" "$TARGET_HOME/bug_bounty/lists"
+  mkdir -p "$TARGET_HOME/bug_bounty/scope" "$TARGET_HOME/bug_bounty/lists" "$TARGET_HOME/bug_bounty/scans"
 
-  pushd "$TARGET_HOME/bug_bounty" >/dev/null || {
-    print_warn "Could not change to $TARGET_HOME/bug_bounty"
-    return 1
-  }
+  # Prefer copy of run.sh from this repo if present; else fetch from GitHub
+  local repo_run=""
+  if [[ -f "$ORIG_PWD/run.sh" ]]; then
+    repo_run="$ORIG_PWD/run.sh"
+  elif [[ -f "$ORIG_PWD/bug_bounty/run.sh" ]]; then
+    repo_run="$ORIG_PWD/bug_bounty/run.sh"
+  fi
 
-  local scan_url="https://raw.githubusercontent.com/thevillagehacker/tools/refs/heads/main/bug_bounty/scan.sh"
-  local target="scan.sh"
-
-  # Download robustly (-f: fail on HTTP error, -S: show error, -L: follow redirects, -O: write filename)
-  if [[ -f "$target" ]]; then
-    print_ok "scan.sh already present at $TARGET_HOME/bug_bounty/$target"
+  if [[ -n "$repo_run" ]]; then
+    cp "$repo_run" "$TARGET_HOME/bug_bounty/run.sh"
+    chmod +x "$TARGET_HOME/bug_bounty/run.sh"
+    print_ok "Installed run.sh → $TARGET_HOME/bug_bounty/run.sh"
   else
-    if curl -fSL -o "$target" "$scan_url"; then
-      chmod +x "$target"
-      print_ok "Downloaded and made executable: $target"
+    local scan_url="https://raw.githubusercontent.com/thevillagehacker/tools/refs/heads/main/bug_bounty/run.sh"
+    if curl -fSL -o "$TARGET_HOME/bug_bounty/run.sh" "$scan_url"; then
+      chmod +x "$TARGET_HOME/bug_bounty/run.sh"
+      print_ok "Downloaded run.sh"
     else
-      print_warn "Failed to download scan.sh from $scan_url"
+      print_warn "Failed to install run.sh — copy it from the tools repo manually."
     fi
   fi
 
-  # Ensure ownership is the real user (useful if script executed with sudo)
+  # Convenience symlink scan.sh → run.sh for older docs/muscle memory
+  ln -sfn run.sh "$TARGET_HOME/bug_bounty/scan.sh" 2>/dev/null || true
+
   if command -v chown >/dev/null 2>&1; then
     sudo chown -R "${TARGET_USER}:${TARGET_USER}" "$TARGET_HOME/bug_bounty" 2>/dev/null || true
   fi
 
-  popd >/dev/null
-  print_success "Bug bounty directory and scan.sh ready at: $TARGET_HOME/bug_bounty"
+  print_success "Bug bounty workspace ready at: $TARGET_HOME/bug_bounty"
 }
 
 
@@ -312,22 +315,28 @@ final_message() {
   cat <<'USAGE'
 
 ==============================================================
-Setup complete! 🚀
+Setup complete!
 
-Usage: ./scan.sh <id>
-This script performs a scan for a given <id>. Ensure the following structure is in place:
+Usage: ./run.sh <id>
+  (scan.sh is a symlink to run.sh when installed via setup)
 
-├── scan.sh
-├── scans
-└── scope
-    └── <id>
+Layout:
+
+├── run.sh
+├── lists/
+├── scans/
+└── scope/
+    └── <id>/
         └── roots.txt
 
 Example:
-chmod +x scan.sh
-mkdir -p scope/example/
-touch scope/example/roots.txt
-./scan.sh example
+  chmod +x run.sh
+  mkdir -p scope/example
+  echo example.com > scope/example/roots.txt
+  ./run.sh example
+  ./run.sh example --passive --no-crawl
+
+See the repository README for Bigfoot, FileFetcher, and other tools.
 ==============================================================
 USAGE
 }
