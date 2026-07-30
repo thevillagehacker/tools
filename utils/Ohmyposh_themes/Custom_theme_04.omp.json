@@ -1,0 +1,142 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "palette": {
+    "cyan": "#00F0FF",
+    "magenta": "#FF2E97",
+    "purple": "#9D4EDD",
+    "green": "#39FF14",
+    "yellow": "#F9F871",
+    "red": "#FF003C",
+    "blue": "#00B4D8",
+    "gray": "#6C7086",
+    "white": "#E6E6FA",
+	"orange": "#FF9E3D"
+  },
+  "blocks": [
+    {
+      "alignment": "left",
+      "segments": [
+        {
+          "foreground": "p:cyan",
+          "style": "plain",
+          "template": "{{ .Icon }} ",
+          "type": "os"
+        },
+        {
+          "foreground": "p:white",
+          "style": "plain",
+          "template": "{{ .UserName }}@{{ .HostName }} ",
+          "type": "session"
+        },
+        {
+          "foreground": "p:magenta",
+          "options": {
+            "folder_icon": "\ue5fe ",
+            "home_icon": "~",
+            "style": "agnoster_short"
+          },
+          "style": "plain",
+          "template": "\uf07c {{ .Path }} ",
+          "type": "path"
+        },
+        {
+          "foreground": "p:green",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#F9F871{{ end }}",
+            "{{ if gt .Ahead 0 }}#00F0FF{{ end }}",
+            "{{ if gt .Behind 0 }}#FF003C{{ end }}"
+          ],
+          "options": {
+            "branch_icon": "\ue725 ",
+            "cherry_pick_icon": "\ue29b ",
+            "commit_icon": "\uf417 ",
+            "fetch_status": true,
+            "fetch_upstream_icon": true,
+            "merge_icon": "\ue727 ",
+            "no_commits_icon": "\uf0c3 ",
+            "rebase_icon": "\ue728 ",
+            "revert_icon": "\uf0e2 ",
+            "tag_icon": "\uf412 "
+          },
+          "style": "plain",
+          "template": "{{ .HEAD }}{{ if .Staging.Changed }} \uf046{{ .Staging.String }}{{ end }}{{ if .Working.Changed }} \uf044{{ .Working.String }}{{ end }}{{ if gt .Ahead 0 }} \u2191{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }} \u2193{{ .Behind }}{{ end }} ",
+          "type": "git"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "right",
+      "segments": [
+        {
+          "foreground": "p:yellow",
+          "style": "plain",
+          "template": "\uf017 {{ .CurrentDate | date \"15:04:05\" }} ",
+          "type": "time"
+        },
+        {
+          "foreground": "p:green",
+          "foreground_templates": [
+            "{{ if eq \"Charging\" .State.String }}#00F0FF{{ end }}",
+            "{{ if eq \"Discharging\" .State.String }}{{ if lt .Percentage 20 }}#FF003C{{ else }}#39FF14{{ end }}{{ end }}"
+          ],
+          "options": {
+            "charging_icon": "\uf1e6 ",
+            "discharging_icon": "\uf242 ",
+            "not_charging_icon": "\uf240 "
+          },
+          "style": "plain",
+          "template": "{{ if not .Error }}{{ .Icon }}{{ .Percentage }}% {{ end }}",
+          "type": "battery"
+        },
+        {
+          "foreground": "p:cyan",
+          "options": {
+            "style": "dallas",
+            "threshold": 0
+          },
+          "style": "plain",
+          "template": "\uf252 {{ .FormattedMs }}s ",
+          "type": "executiontime"
+        },
+        {
+          "foreground": "p:red",
+          "options": {
+            "root_icon": "\u26a1"
+          },
+          "style": "plain",
+          "template": "{{ if .Root }}{{ .RootIcon }} {{ end }}",
+          "type": "root"
+        },
+        {
+          "foreground": "p:blue",
+          "style": "plain",
+          "template": "\uf85a {{ round .PhysicalPercentUsed .Precision }}% ({{ (div ((sub .PhysicalTotalMemory .PhysicalAvailableMemory)|float64) 1073741824.0) }}/{{ (div .PhysicalTotalMemory 1073741824.0) }}GB)",
+          "type": "sysinfo"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "foreground": "p:green",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#FF003C{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "plain",
+          "template": "\u276f ",
+          "type": "status"
+        }
+      ],
+      "type": "prompt"
+    }
+  ],
+  "final_space": true,
+  "version": 4
+}
