@@ -1,0 +1,73 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 3,
+  "final_space": true,
+  "console_title_template": "{{ .Folder }}",
+  "palette": {
+    "text": "#F5F5F7",
+    "muted": "#8E8E93",
+    "blue": "#0A84FF",
+    "green": "#30D158",
+    "red": "#FF453A",
+    "amber": "#FFD60A"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "path",
+          "style": "plain",
+          "foreground": "p:blue",
+          "template": "{{ .Path }}",
+          "properties": {
+            "style": "agnoster_short",
+            "max_depth": 3,
+            "home_icon": "~",
+            "folder_icon": "",
+            "folder_separator_icon": "/"
+          }
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "foreground": "p:muted",
+          "template": "  {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }}",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FFD60A{{ end }}",
+            "{{ if and (not .Working.Changed) (not .Staging.Changed) }}#30D158{{ end }}"
+          ],
+          "properties": {
+            "branch_icon": "",
+            "fetch_status": true
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "p:green",
+          "template": "❯",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#FF453A{{ end }}"
+          ],
+          "properties": {
+            "always_enabled": true
+          }
+        }
+      ]
+    }
+  ],
+  "transient_prompt": {
+    "background": "transparent",
+    "foreground": "#8E8E93",
+    "template": "❯ "
+  }
+}
