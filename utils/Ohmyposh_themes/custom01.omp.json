@@ -28,7 +28,8 @@
         {
           "background": "#95ffa4",
           "background_templates": [
-            "{{ if or (.Working.Changed) (.Staging.Changed) }}#ff9248{{ end }}"
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#ff9248{{ end }}",
+            "{{ if or (gt .Ahead 0) (not .Upstream) (.UpstreamGone) }}#c19c00{{ end }}"
           ],
           "foreground": "#193549",
           "options": {
